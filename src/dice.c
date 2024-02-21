@@ -17,7 +17,7 @@ void animation() {
     sleepTime.tv_nsec = 250000000; // 250 milliseconds
 
     clearTerminal();
-    printf("Rolling the dice\n");
+    printf("Good luck Obama\n");
     nanosleep(&sleepTime, NULL);
     clearTerminal();
 
