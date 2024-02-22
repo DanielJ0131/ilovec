@@ -48,7 +48,7 @@ void animation() {
 }
 
 void drawDice(int number) {
-    printf(".----------------.\n");
+    printf("    .----------------.\n");
     
     switch(number) {
         case 1:
