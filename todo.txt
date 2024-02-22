@@ -3,6 +3,7 @@ dice game
 1. 3d dice - complete
 2. sexy menu
 3. dice count (stats)
+4. mode for looping infinitely or default (choice to roll again)
 ??. obama easter egg
 =====================================================================================================================
 
