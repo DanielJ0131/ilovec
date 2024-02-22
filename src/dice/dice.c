@@ -91,7 +91,6 @@ void main() {
         int result = rollDice();
         printf("The dice rolled: %d!\n", result);
         drawDice(result);
-        printf("Hello");
         sleep(1);
         clearTerminal();
     }
