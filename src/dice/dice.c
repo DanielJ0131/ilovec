@@ -48,39 +48,80 @@ void animation() {
 }
 
 void drawDice(int number) {
-    printf(" ________\n");
-    printf("|        |\n");
+    printf(".----------------.\n");
     
     switch(number) {
         case 1:
-            printf("|   *    |\n");
-            printf("|        |\n");
+            printf("   /  o         o   / |\n");
+            printf("  /       o        /  |\n");
+            printf(" /  o         o   /  o|\n");
+            printf(" --------------- '    |\n");
+            printf("|                |  o |\n");
+            printf("|                |    |\n");
+            printf("|       o        | o /\n");
+            printf("|                |  /\n");
+            printf("|                | /\n");
             break;
         case 2:
-            printf("| *   *  |\n");
-            printf("|        |\n");
+            printf("   /            o   / |\n");
+            printf("  /       o        /  |\n");
+            printf(" /  o             /   |\n");
+            printf(" --------------- '    |\n");
+            printf("| o              |  o |\n");
+            printf("|                |    |\n");
+            printf("|                |   / \n");
+            printf("|                |  /\n");
+            printf("|             o  | /\n");
             break;
         case 3:
-            printf("| * * *  |\n");
-            printf("|        |\n");
+            printf("   /                / |\n");
+            printf("  /       o        /  |\n");
+            printf(" /                /  o|\n");
+            printf(" --------------- '    |\n");
+            printf("| o              |    |\n");
+            printf("|                |    |\n");
+            printf("|       o        | o / \n");
+            printf("|                |  /\n");
+            printf("|             o  | /\n");
             break;
         case 4:
-            printf("| *   *  |\n");
-            printf("| *   *  |\n");
+            printf("   /  o         o   / |\n");
+            printf("  /       o        /  |\n");
+            printf(" /  o         o   /   |\n");
+            printf(" --------------- '    |\n");
+            printf("| o           o  |  o |\n");
+            printf("|                |    |\n");
+            printf("|                |   / \n");
+            printf("|                |  /\n");
+            printf("| o           o  | /\n");
             break;
         case 5:
-            printf("| * * *  |\n");
-            printf("| *   *  |\n");
+            printf("   /                / |\n");
+            printf("  /       o        /  |\n");
+            printf(" /                /  o|\n");
+            printf(" --------------- '    |\n");
+            printf("| o           o  |  o |\n");
+            printf("|                |    |\n");
+            printf("|       o        | o / \n");
+            printf("|                |  /\n");
+            printf("| o           o  | /\n");
             break;
         case 6:
-            printf("| * * *  |\n");
-            printf("| * * *  |\n");
+            printf("   /  o         o   / |\n");
+            printf("  /       o        /  |\n");
+            printf(" /  o         o   /  o|\n");
+            printf(" --------------- '    |\n");
+            printf("| o     o     o  |  o |\n");
+            printf("|                |    |\n");
+            printf("|                | o / \n");
+            printf("|                |  /\n");
+            printf("| o     o     o  | /\n");
             break;
         default:
             break;
     }
     
-    printf(" --------\n");
+    printf("'----------------'\n");
 
 }
 
