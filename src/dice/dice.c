@@ -42,13 +42,15 @@ void menu() {
 
     switch (choice) {
         case '1':
-            printf("Rolling the dice...\n");
             break;
         case '2':
             exit(0);
             break;
         default:
             printf("Invalid choice. Please try again.\n");
+            sleep(2);
+            menu();
+            break;
     }
 }
 
