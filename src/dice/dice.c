@@ -172,4 +172,5 @@ int main(void) {
         sleep(2);
         clearScreen();
     }
+    return 0;
 }
