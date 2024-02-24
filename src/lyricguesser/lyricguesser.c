@@ -75,8 +75,9 @@ int main() {
         // Copy the lyrics to the list
         strcpy(lyricsList[lyricsCount], lyrics);
         lyricsCount++;
-        printf("%s", lyrics);
     }
+
+    printf(lyricsList[0]);
 
     fclose(file);
     return 0;
