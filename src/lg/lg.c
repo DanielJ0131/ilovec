@@ -58,15 +58,18 @@ void menu() {
     }
 }
 
-void paths() {
-    char paths[30] = "lyrics/";
-    char* path = strcat(paths, "cherrypop.txt");
-    printf("%s", path);
+char paths() {
+    char pathsarray[2][30];
+    strcpy(pathsarray[0], "lyrics/cherrypop.txt");
+    strcpy(pathsarray[1], "lyrics/dopamine.txt");
+    return pathsarray[2][30];
 }
 
 int main() {
     menu();
-    paths();
+
+    // Define the paths to the lyrics
+    char pathsarray = paths();
 
     // Open the file unless it doesn't exist
     FILE *file = fopen("lyrics/cherrypop.txt", "r");
@@ -87,6 +90,7 @@ int main() {
             lyricsCount++;
         }
     }
+
 
     // Seed the random number generator
     srand(time(NULL));
