@@ -58,8 +58,15 @@ void menu() {
     }
 }
 
+void paths() {
+    char paths[30] = "lyrics/";
+    char* path = strcat(paths, "cherrypop.txt");
+    printf("%s", path);
+}
+
 int main() {
     menu();
+    paths();
 
     // Open the file unless it doesn't exist
     FILE *file = fopen("lyrics/cherrypop.txt", "r");
@@ -93,3 +100,5 @@ int main() {
     fclose(file);
     return 0;
 }
+
+
