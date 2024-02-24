@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 #define MAX_LENGTH 1000
 
@@ -14,7 +16,7 @@ void printHeader() {
 
     // Print a stylized title
     printf("+-------------------------+\n");
-    printf("|   Cool 3D Dice Menu    |\n");
+    printf("|       Lyric Guesser     |\n");
     printf("+-------------------------+\n");
 
     // ANSI escape code reset text color
