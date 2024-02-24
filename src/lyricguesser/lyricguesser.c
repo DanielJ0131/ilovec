@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define MAX_LENGTH 1000
 
@@ -17,7 +18,7 @@ void printHeader() {
 
     // Print a stylized title
     printf("+-------------------------+\n");
-    printf("|       Lyric Guesser     |\n");
+    printf("|      Lyric Guesser      |\n");
     printf("+-------------------------+\n");
 
     // ANSI escape code reset text color
@@ -77,7 +78,14 @@ int main() {
         lyricsCount++;
     }
 
-    printf(lyricsList[0]);
+    // Seed the random number generator
+    srand(time(NULL));
+
+    // Generate a random index within the range of lyricsCount
+    int randomIndex = rand() % lyricsCount;
+
+    // Print out the randomly selected lyric
+    printf("%s", lyricsList[randomIndex]);
 
     fclose(file);
     return 0;
