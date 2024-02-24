@@ -4,7 +4,7 @@
 #include <string.h>
 #include <time.h>
 
-#define MAX_LENGTH 1000
+#define MAX_LENGTH 100
 
 // Taken from dice/dice.c
 void clearScreen() {
@@ -69,14 +69,16 @@ int main() {
         main();
     }
 
-    // Create a list to store the lyrics
-    char lyricsList[MAX_LENGTH][MAX_LENGTH];
+    // Create a 2D array to store the lyrics
+    char lyrics[MAX_LENGTH][MAX_LENGTH];
     int lyricsCount = 0;
-    char lyrics[MAX_LENGTH];
-    while (fgets(lyrics, MAX_LENGTH, file) != NULL) {
+    char lyricsString[MAX_LENGTH];
+    while (fgets(lyricsString, MAX_LENGTH, file) != NULL) {
         // Copy the lyrics to the list
-        strcpy(lyricsList[lyricsCount], lyrics);
-        lyricsCount++;
+        if (lyrics[lyricsCount] != NULL) {
+            strcpy(lyrics[lyricsCount], lyricsString);
+            lyricsCount++;
+        }
     }
 
     // Seed the random number generator
@@ -86,7 +88,7 @@ int main() {
     int randomIndex = rand() % lyricsCount;
 
     // Print out the randomly selected lyric
-    printf("%s", lyricsList[randomIndex]);
+    printf("%s", lyrics[randomIndex]);
 
     fclose(file);
     return 0;
