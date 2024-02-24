@@ -59,14 +59,21 @@ void menu() {
 int main() {
     menu();
 
+    // Open the file unless it doesn't exist
     FILE *file = fopen("lyrics/cherrypop.txt", "r");
     if (file == NULL) {
         printf("Failed to open the file.\n");
         return 1;
     }
 
+    // Create a list to store the lyrics
+    char lyricsList[MAX_LENGTH][MAX_LENGTH];
+    int lyricsCount = 0;
     char lyrics[MAX_LENGTH];
     while (fgets(lyrics, MAX_LENGTH, file) != NULL) {
+        // Copy the lyrics to the list
+        strcpy(lyricsList[lyricsCount], lyrics);
+        lyricsCount++;
         printf("%s", lyrics);
     }
 
