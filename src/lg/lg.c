@@ -65,7 +65,8 @@ int main() {
     FILE *file = fopen("lyrics/cherrypop.txt", "r");
     if (file == NULL) {
         printf("Failed to open the file.\n");
-        return 1;
+        sleep(2);
+        main();
     }
 
     // Create a list to store the lyrics
