@@ -59,7 +59,7 @@ void menu() {
 int main() {
     menu();
 
-    FILE *file = fopen("lyrics/lyrics.txt", "r");
+    FILE *file = fopen("lyrics/cherrypop.txt", "r");
     if (file == NULL) {
         printf("Failed to open the file.\n");
         return 1;
