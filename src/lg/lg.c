@@ -5,7 +5,7 @@
 #include <string.h>
 #include <time.h>
 
-#define MAX_LENGTH 100
+#define MAX_LENGTH 1000
 
 // Taken from dice/dice.c
 void clearScreen() {
@@ -59,14 +59,20 @@ void menu() {
     }
 }
 
+// Structure to hold both the array and its count
+typedef struct {
+    char **array;
+    int count;
+} LyricsStruct;
+
 // Function to generate a list of strings based on files in a directory
-char** generateLyricsList(const char *directory) {
+LyricsStruct generateLyricsList(const char *directory) {
     DIR *dir;
     struct dirent *entry;
     
     // Open the directory
     dir = opendir(directory);
-    if (!dir) {
+    if (!dir) {multiplied
         perror("Error opening directory");
         exit(EXIT_FAILURE);
     }
@@ -78,9 +84,10 @@ char** generateLyricsList(const char *directory) {
             fileCount++;
         }
     }
+    printf("Files found: %d\n", fileCount);
 
     // Allocate memory for an array of strings
-    char **lyricsList = (char**)malloc(fileCount * sizeof(char*));
+    char **lyricsList = (char**)malloc((size_t)fileCount * sizeof(char*));
     if (!lyricsList) {
         perror("Memory allocation failed");
         exit(EXIT_FAILURE);
@@ -109,7 +116,11 @@ char** generateLyricsList(const char *directory) {
     // Close the directory
     closedir(dir);
 
-    return lyricsList;
+    LyricsStruct result;
+    result.array = lyricsList;
+    result.count = fileCount;
+
+    return result;
 }
 
 // Function to free the memory allocated for the list of strings
@@ -125,18 +136,32 @@ int main() {
 
     // Define the paths to the lyrics
     const char *directory = "lyrics"; // Set directory path
-    char **lyricsList = generateLyricsList(directory);
+    LyricsStruct mainLyricsStruct = generateLyricsList(directory);
+    
+    if (mainLyricsStruct.array == NULL || mainLyricsStruct.count == 0) {
+        printf("Failed to generate or empty lyrics list.\n");
+        return 1;
+    }
+
+    srand(time(NULL));
+
+    int randomIndex = rand() % mainLyricsStruct.count;
+
+    char *randomLyrics = mainLyricsStruct.array[randomIndex];
 
     // Open the file unless it doesn't exist
-    FILE *file = fopen("lyrics/cherrypop.txt", "r");
+    FILE *file = fopen(randomLyrics, "r");
     if (file == NULL) {
         printf("Failed to open the file.\n");
         sleep(2);
         main();
     }
+    printf("Song chosen: %s\n", mainLyricsStruct.array[randomIndex]);
+    printf("%c\n", mainLyricsStruct.count);
+    printf("%s\n", mainLyricsStruct.array[randomIndex]);
 
-    // Free the allocated memory from generatelyrics()
-    freeLyricsList(lyricsList, fileCount);
+    // Free the allocated memory from generateLyricsList()
+    freeLyricsList(mainLyricsStruct.array, mainLyricsStruct.count);
 
     // Create a 2D array to store the lyrics
     char lyrics[MAX_LENGTH][MAX_LENGTH];
@@ -150,14 +175,13 @@ int main() {
         }
     }
 
-    // Seed the random number generator
     srand(time(NULL));
 
     // Generate a random index within the range of lyricsCount
-    int randomIndex = rand() % lyricsCount;
+    randomIndex = rand() % lyricsCount;
 
     // Print out the randomly selected line of lyric
-    printf("%s", lyricsString[randomIndex]);
+    printf("%s\n", lyrics[randomIndex]);
 
     fclose(file);
     return 0;
