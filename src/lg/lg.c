@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include <string.h>
 #include <time.h>
 
@@ -58,18 +59,73 @@ void menu() {
     }
 }
 
-char paths() {
-    char pathsarray[2][30];
-    strcpy(pathsarray[0], "lyrics/song1.txt");
-    strcpy(pathsarray[1], "lyrics/song2.txt");
-    return pathsarray[2][30];
+// Function to generate a list of strings based on files in a directory
+char** generateLyricsList(const char *directory) {
+    DIR *dir;
+    struct dirent *entry;
+    
+    // Open the directory
+    dir = opendir(directory);
+    if (!dir) {
+        perror("Error opening directory");
+        exit(EXIT_FAILURE);
+    }
+
+    // Count the number of files in the directory
+    int fileCount = 0;
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_type == DT_REG) {
+            fileCount++;
+        }
+    }
+
+    // Allocate memory for an array of strings
+    char **lyricsList = (char**)malloc(fileCount * sizeof(char*));
+    if (!lyricsList) {
+        perror("Memory allocation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Reset the directory stream and iterate through files again
+    rewinddir(dir);
+
+    int index = 0;
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_type == DT_REG) {
+            // Allocate memory for each string
+            lyricsList[index] = (char*)malloc((strlen(directory) + strlen(entry->d_name) + 2) * sizeof(char));
+            if (!lyricsList[index]) {
+                perror("Memory allocation failed");
+                exit(EXIT_FAILURE);
+            }
+
+            // Construct the string in the desired format
+            sprintf(lyricsList[index], "%s/%s", directory, entry->d_name);
+
+            index++;
+        }
+    }
+
+    // Close the directory
+    closedir(dir);
+
+    return lyricsList;
+}
+
+// Function to free the memory allocated for the list of strings
+void freeLyricsList(char **lyricsList, int size) {
+    for (int i = 0; i < size; i++) {
+        free(lyricsList[i]);
+    }
+    free(lyricsList);
 }
 
 int main() {
     menu();
 
     // Define the paths to the lyrics
-    char pathsarray = paths();
+    const char *directory = "lyrics"; // Set directory path
+    char **lyricsList = generateLyricsList(directory);
 
     // Open the file unless it doesn't exist
     FILE *file = fopen("lyrics/cherrypop.txt", "r");
@@ -78,6 +134,9 @@ int main() {
         sleep(2);
         main();
     }
+
+    // Free the allocated memory from generatelyrics()
+    freeLyricsList(lyricsList, fileCount);
 
     // Create a 2D array to store the lyrics
     char lyrics[MAX_LENGTH][MAX_LENGTH];
@@ -91,15 +150,14 @@ int main() {
         }
     }
 
-
     // Seed the random number generator
     srand(time(NULL));
 
     // Generate a random index within the range of lyricsCount
     int randomIndex = rand() % lyricsCount;
 
-    // Print out the randomly selected lyric
-    printf("%s", lyrics[randomIndex]);
+    // Print out the randomly selected line of lyric
+    printf("%s", lyricsString[randomIndex]);
 
     fclose(file);
     return 0;
