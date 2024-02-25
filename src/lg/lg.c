@@ -42,7 +42,7 @@ void menu() {
 
     char choice;
     printf("Enter your choice: ");
-    scanf(" %c", &choice);
+    scanf("%c", &choice);
 
     switch (choice) {
         case '1':
