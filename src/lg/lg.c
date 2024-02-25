@@ -42,7 +42,7 @@ void menu() {
 
     char choice;
     printf("Enter your choice: ");
-    scanf("%c", &choice);
+    scanf(" %c", &choice);  // The space removes whitespace it's not a typo
 
     switch (choice) {
         case '1':
@@ -60,8 +60,8 @@ void menu() {
 
 char paths() {
     char pathsarray[2][30];
-    strcpy(pathsarray[0], "lyrics/cherrypop.txt");
-    strcpy(pathsarray[1], "lyrics/dopamine.txt");
+    strcpy(pathsarray[0], "lyrics/song1.txt");
+    strcpy(pathsarray[1], "lyrics/song2.txt");
     return pathsarray[2][30];
 }
 
