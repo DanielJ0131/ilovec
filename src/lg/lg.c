@@ -5,7 +5,7 @@
 #include <string.h>
 #include <time.h>
 
-#define MAX_LENGTH 1000
+#define MAX_LENGTH 300
 
 // Taken from dice/dice.c
 void clearScreen() {
@@ -59,13 +59,13 @@ void menu() {
     }
 }
 
-// Structure to hold both the array and its count
+// Structure to hold both the array and number of elements
 typedef struct {
     char **array;
     int count;
 } LyricsStruct;
 
-// Function to generate a list and amount of strings based on files in a directory
+// Function to generate a list and amount of entries in a directory
 LyricsStruct generateLyricsList(const char *directory) {
     DIR *dir;
     struct dirent *entry;
@@ -123,6 +123,50 @@ LyricsStruct generateLyricsList(const char *directory) {
     return result;
 }
 
+// Function to generate lyrics from a text file
+LyricsStruct generateLyrics(FILE *file) {
+    LyricsStruct result;
+    result.array = malloc(MAX_LENGTH * sizeof(char *));
+    result.count = 0;
+    
+    if (result.array == NULL) {
+        perror("Error allocating memory for lines array");
+        return result;
+    }
+
+    char buffer[100];  // Adjust the buffer size based on your needs
+
+    // Read each line from the file
+    while (fgets(buffer, sizeof(buffer), file) != NULL && result.count < MAX_LENGTH) {
+        // Remove the newline character at the end
+        size_t len = strlen(buffer);
+        if (len > 0 && buffer[len - 1] == '\n') {
+            buffer[len - 1] = '\0';
+        }
+
+        // Allocate memory for the line and store it in the array
+        result.array[result.count] = strdup(buffer);
+        if (result.array[result.count] == NULL) {
+            perror("Error allocating memory");
+
+            // Free allocated memory before returning
+            for (int i = 0; i < result.count; i++) {
+                free(result.array[i]);
+            }
+            free(result.array);
+
+            return NULL;
+        }
+
+        result.count++;
+    }
+
+    // Close the file
+    fclose(file);
+
+    return result;
+}
+
 // Function to free the memory allocated for the list of strings
 void freeLyricsList(char **lyricsList, int size) {
     for (int i = 0; i < size; i++) {
@@ -136,18 +180,21 @@ int main() {
 
     // Define the paths to the lyrics
     const char *directory = "lyrics"; // Set directory path
-    LyricsStruct mainLyricsStruct = generateLyricsList(directory);
+    LyricsStruct lyricsList = generateLyricsList(directory);
     
-    if (mainLyricsStruct.array == NULL || mainLyricsStruct.count == 0) {
+    if (lyricsList.array == NULL || lyricsList.count == 0) {
         perror("Failed to generate or empty lyrics list.\n");
         return 1;
     }
 
     srand(time(NULL));
 
-    int randomIndex = rand() % mainLyricsStruct.count;
+    int randomIndex = rand() % lyricsList.count;
 
-    char *randomLyrics = mainLyricsStruct.array[randomIndex];
+    char *randomLyrics = lyricsList.array[randomIndex];
+
+    // Free the allocated memory from generateLyricsList()
+    freeLyricsList(lyricsList.array, lyricsList.count);
 
     // Open the file unless it doesn't exist
     FILE *file = fopen(randomLyrics, "r");
@@ -158,20 +205,17 @@ int main() {
     }
     printf("Song chosen: %s\n", randomLyrics);  // for debug purposes
 
-    // Free the allocated memory from generateLyricsList()
-    freeLyricsList(mainLyricsStruct.array, mainLyricsStruct.count);
-
     // Create a 2D array to store the lyrics
-    char lyrics[MAX_LENGTH][MAX_LENGTH];
-    int lyricsCount = 0;
-    char lyricsString[MAX_LENGTH];
-    while (fgets(lyricsString, MAX_LENGTH, file) != NULL) {
-        // Copy the lyrics to the list
-        if (lyrics[lyricsCount] != NULL) {
-            strcpy(lyrics[lyricsCount], lyricsString);
-            lyricsCount++;
-        }
-    }
+    // char lyrics[MAX_LENGTH][MAX_LENGTH];
+    // int lyricsCount = 0;
+    // char lyricsString[MAX_LENGTH];
+    // while (fgets(lyricsString, MAX_LENGTH, file) != NULL) {
+    //     // Copy the lyrics to the list
+    //     if (lyrics[lyricsCount] != NULL) {
+    //         strcpy(lyrics[lyricsCount], lyricsString);
+    //         lyricsCount++;
+    //     }
+    // }
 
     srand(time(NULL));
 
