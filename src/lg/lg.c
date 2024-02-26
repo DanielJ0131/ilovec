@@ -52,7 +52,7 @@ void menu() {
             exit(0);
             break;
         default:
-            printf("Invalid choice. Please try again.\n");
+            perror("Invalid choice. Please try again.\n");
             sleep(2);
             menu();
             break;
@@ -72,7 +72,7 @@ LyricsStruct generateLyricsList(const char *directory) {
     
     // Open the directory
     dir = opendir(directory);
-    if (!dir) {multiplied
+    if (!dir) {
         perror("Error opening directory");
         exit(EXIT_FAILURE);
     }
@@ -139,7 +139,7 @@ int main() {
     LyricsStruct mainLyricsStruct = generateLyricsList(directory);
     
     if (mainLyricsStruct.array == NULL || mainLyricsStruct.count == 0) {
-        printf("Failed to generate or empty lyrics list.\n");
+        perror("Failed to generate or empty lyrics list.\n");
         return 1;
     }
 
@@ -157,8 +157,7 @@ int main() {
         main();
     }
     printf("Song chosen: %s\n", mainLyricsStruct.array[randomIndex]);
-    printf("%c\n", mainLyricsStruct.count);
-    printf("%s\n", mainLyricsStruct.array[randomIndex]);
+    printf("Songs found: %i\n", mainLyricsStruct.count);
 
     // Free the allocated memory from generateLyricsList()
     freeLyricsList(mainLyricsStruct.array, mainLyricsStruct.count);
@@ -186,5 +185,3 @@ int main() {
     fclose(file);
     return 0;
 }
-
-
