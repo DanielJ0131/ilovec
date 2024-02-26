@@ -65,7 +65,7 @@ typedef struct {
     int count;
 } LyricsStruct;
 
-// Function to generate a list of strings based on files in a directory
+// Function to generate a list and amount of strings based on files in a directory
 LyricsStruct generateLyricsList(const char *directory) {
     DIR *dir;
     struct dirent *entry;
@@ -156,8 +156,7 @@ int main() {
         sleep(2);
         main();
     }
-    printf("Song chosen: %s\n", mainLyricsStruct.array[randomIndex]);
-    printf("Songs found: %i\n", mainLyricsStruct.count);
+    printf("Song chosen: %s\n", randomLyrics);  // for debug purposes
 
     // Free the allocated memory from generateLyricsList()
     freeLyricsList(mainLyricsStruct.array, mainLyricsStruct.count);
