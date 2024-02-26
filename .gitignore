@@ -51,6 +51,7 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# idk Arch linux?
+# idk "Code - OSS" things?
 .vscode
 src/.vscode
+build/
