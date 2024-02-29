@@ -1,0 +1,1 @@
+sed -n '/<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->/,/<br><br>/ { /<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->/b; /<br><br>/b; s/<[^>]*>//g; /^$/d; p }' arg

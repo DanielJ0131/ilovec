@@ -127,7 +127,8 @@ LyricsStruct generateLyricsList(const char *directory) {
 LyricsStruct generateLyrics(FILE *file) {
     LyricsStruct result;
     result.array = malloc(MAX_LENGTH * sizeof(char *));
-    result.count = 0;
+    int stringCount;
+    result.count = stringCount;
     
     if (result.array == NULL) {
         perror("Error allocating memory for lines array");
@@ -145,17 +146,17 @@ LyricsStruct generateLyrics(FILE *file) {
         }
 
         // Allocate memory for the line and store it in the array
-        result.array[result.count] = strdup(buffer);
-        if (result.array[result.count] == NULL) {
+        result.array[stringCount] = strdup(buffer);
+        if (result.array[stringCount] == NULL) {
             perror("Error allocating memory");
 
             // Free allocated memory before returning
-            for (int i = 0; i < result.count; i++) {
+            for (int i = 0; i < stringCount; i++) {
                 free(result.array[i]);
             }
             free(result.array);
 
-            return NULL;
+            return result;
         }
 
         result.count++;
@@ -205,6 +206,7 @@ int main() {
     }
     printf("Song chosen: %s\n", randomLyrics);  // for debug purposes
 
+   LyricsStruct lyrics = generateLyrics(file);
     // Create a 2D array to store the lyrics
     // char lyrics[MAX_LENGTH][MAX_LENGTH];
     // int lyricsCount = 0;
@@ -220,10 +222,10 @@ int main() {
     srand(time(NULL));
 
     // Generate a random index within the range of lyricsCount
-    randomIndex = rand() % lyricsCount;
+    randomIndex = rand() % lyrics.count;
 
     // Print out the randomly selected line of lyric
-    printf("%s\n", lyrics[randomIndex]);
+    printf("%s\n", lyrics.array[randomIndex]);
 
     fclose(file);
     return 0;
