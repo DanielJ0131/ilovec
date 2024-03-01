@@ -59,7 +59,7 @@ void menu() {
     }
 }
 
-// Structure to hold both the array and number of elements
+// Structure to hold both array and number of elements
 typedef struct {
     char **array;
     int count;
@@ -100,14 +100,14 @@ LyricsStruct generateLyricsList(const char *directory) {
     while ((entry = readdir(dir)) != NULL) {
         if (entry->d_type == DT_REG) {
             // Allocate memory for each string
-            lyricsList[index] = (char*)malloc((strlen(directory) + strlen(entry->d_name) + 2) * sizeof(char));
+            lyricsList[index] = (char*)malloc((strlen(entry->d_name) + 1) * sizeof(char));
             if (!lyricsList[index]) {
                 perror("Memory allocation failed");
                 exit(EXIT_FAILURE);
             }
 
             // Construct the string in the desired format
-            sprintf(lyricsList[index], "%s/%s", directory, entry->d_name);
+            strcpy(lyricsList[index], entry->d_name);
 
             index++;
         }
@@ -161,9 +161,6 @@ LyricsStruct generateLyrics(FILE *file) {
        result.count++;
     }
 
-    // Close the file
-    fclose(file);
-
     return result;
 }
 
@@ -175,8 +172,29 @@ void freeLyricsList(char **lyricsList, int size) {
     free(lyricsList);
 }
 
+// Function to parse user input for correct answer
+void guesser(const char *correctAnswer) {
+    char input[35];
+
+    printf("Which song is this?\n");
+    printf("Enter your answer:\n");
+    fgets(input, sizeof(input), stdin);
+   // if (sscanf(input, "%s", correctAnswer));
+    
+    int result = strcmp(input, correctAnswer);
+
+    if (result == 0) {
+        printf("Correct!\n");
+    } else {
+        printf("Incorrect. Try again.\n");
+        sleep(1);
+        guesser(correctAnswer);
+    }
+}
+
 int main() {
     menu();
+    clearScreen();
 
     // Define the paths to the lyrics
     const char *directory = "lyrics"; // Set directory path
@@ -191,10 +209,14 @@ int main() {
 
     int randomIndex = rand() % lyricsList.count;
 
-    char *randomLyrics = lyricsList.array[randomIndex];
+    // Allocate memory for entire path
+    char *lyricsPath = (char*)malloc((strlen(directory) + strlen(lyricsList.array[randomIndex]) + 2) * sizeof(char));
+
+    // Prefix directory path to chosen .txt file
+    sprintf(lyricsPath, "%s/%s", directory, lyricsList.array[randomIndex]);
 
     // Open the file unless it doesn't exist
-    FILE *file = fopen(randomLyrics, "r");
+    FILE *file = fopen(lyricsPath, "r");
     if (file == NULL) {
         printf("Failed to open the file.\n");
         sleep(2);
@@ -202,6 +224,12 @@ int main() {
     }
 
     LyricsStruct lyrics = generateLyrics(file);
+
+    // Close the file
+    fclose(file);
+    
+    // Store answer before freeing lyricsList
+    char *correctAnswer = lyricsList.array[randomIndex];
 
     // Free the allocated memory from generateLyricsList()
     freeLyricsList(lyricsList.array, lyricsList.count);
@@ -213,6 +241,8 @@ int main() {
 
     // Print out the randomly selected line of lyric
     printf("%s\n", lyrics.array[randomIndex]);
+
+    //guesser(correctAnswer);
 
     printf("hello obama\n");
     return 0;
