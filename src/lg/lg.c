@@ -189,7 +189,7 @@ int main() {
 
     srand(time(NULL));
 
-    int randomIndex = 1; //  rand() % lyricsList.count;
+    int randomIndex = rand() % lyricsList.count;
 
     char *randomLyrics = lyricsList.array[randomIndex];
 
@@ -200,20 +200,8 @@ int main() {
         sleep(2);
         main();
     }
-    printf("Song chosen: %s\n", randomLyrics);  // for debug purposes
 
     LyricsStruct lyrics = generateLyrics(file);
-    // Create a 2D array to store the lyrics
-    // char lyrics[MAX_LENGTH][MAX_LENGTH];
-    // int lyricsCount = 0;
-    // char lyricsString[MAX_LENGTH];
-    // while (fgets(lyricsString, MAX_LENGTH, file) != NULL) {
-    //     // Copy the lyrics to the list
-    //     if (lyrics[lyricsCount] != NULL) {
-    //         strcpy(lyrics[lyricsCount], lyricsString);
-    //         lyricsCount++;
-    //     }
-    // }
 
     // Free the allocated memory from generateLyricsList()
     freeLyricsList(lyricsList.array, lyricsList.count);
