@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -99,14 +100,17 @@ LyricsStruct generateLyricsList(const char *directory) {
     int index = 0;
     while ((entry = readdir(dir)) != NULL) {
         if (entry->d_type == DT_REG) {
-            // Allocate memory for each string
-            lyricsList[index] = (char*)malloc((strlen(entry->d_name) + 1) * sizeof(char));
+            // Allocate memory for each string without .txt
+            lyricsList[index] = (char*)malloc((strlen(entry->d_name) - 3) * sizeof(char));
             if (!lyricsList[index]) {
                 perror("Memory allocation failed");
                 exit(EXIT_FAILURE);
             }
 
-            // Construct the string in the desired format
+            // Construct the string without .txt
+            size_t filenameLength = strlen(entry->d_name);
+            entry->d_name[filenameLength - 4] = '\0';
+
             strcpy(lyricsList[index], entry->d_name);
 
             index++;
@@ -177,9 +181,9 @@ void guesser(const char *correctAnswer) {
     char input[35];
 
     printf("Which song is this?\n");
-    printf("Enter your answer:\n");
+    printf("Enter your answer: \n");
+
     fgets(input, sizeof(input), stdin);
-   // if (sscanf(input, "%s", correctAnswer));
     
     int result = strcmp(input, correctAnswer);
 
@@ -207,13 +211,13 @@ int main() {
 
     srand(time(NULL));
 
-    int randomIndex = rand() % lyricsList.count;
+    int randomIndex = 1; //rand() % lyricsList.count;
 
-    // Allocate memory for entire path
-    char *lyricsPath = (char*)malloc((strlen(directory) + strlen(lyricsList.array[randomIndex]) + 2) * sizeof(char));
+    // Allocate memory for entire path including ".txt" and "/"
+    char *lyricsPath = (char*)malloc((strlen(directory) + strlen(lyricsList.array[randomIndex]) + 6) * sizeof(char));
 
     // Prefix directory path to chosen .txt file
-    sprintf(lyricsPath, "%s/%s", directory, lyricsList.array[randomIndex]);
+    sprintf(lyricsPath, "%s/%s.txt", directory, lyricsList.array[randomIndex]);
 
     // Open the file unless it doesn't exist
     FILE *file = fopen(lyricsPath, "r");
