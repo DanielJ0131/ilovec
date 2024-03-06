@@ -235,6 +235,7 @@ int main() {
     } else {
         strcpy(correctAnswer, lyricsList.array[randomIndex]); 
     }
+
     // Free the allocated memory from generateLyricsList()
     freeLyricsList(lyricsList.array, lyricsList.count);
 
@@ -247,6 +248,8 @@ int main() {
     printf("%s\n", lyrics.array[randomIndex]);
 
     guesser(correctAnswer);
+
+    free(correctAnswer);
 
     printf("hello obama\n");
     return 0;
