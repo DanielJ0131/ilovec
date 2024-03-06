@@ -228,9 +228,13 @@ int main() {
     // Close the file
     fclose(file);
     
-    // Store answer before freeing lyricsList
-    char *correctAnswer = lyricsList.array[randomIndex];
-
+    // Allocate memory and store answer before freeing lyricsList
+    char *correctAnswer = (char*)malloc((strlen(lyricsList.array[randomIndex]) + 1) * sizeof(char));
+    if (correctAnswer == NULL) {
+        perror("Error allocating memory for correctAnswer");
+    } else {
+        strcpy(correctAnswer, lyricsList.array[randomIndex]); 
+    }
     // Free the allocated memory from generateLyricsList()
     freeLyricsList(lyricsList.array, lyricsList.count);
 
@@ -242,7 +246,7 @@ int main() {
     // Print out the randomly selected line of lyric
     printf("%s\n", lyrics.array[randomIndex]);
 
-    //guesser(correctAnswer);
+    guesser(correctAnswer);
 
     printf("hello obama\n");
     return 0;
