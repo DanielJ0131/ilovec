@@ -37,6 +37,11 @@ void printMenu() {
     printf("\033[0m");
 }
 
+void clearInputBuffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
+
 void menu() {
     clearScreen();
     printHeader();
@@ -48,6 +53,7 @@ void menu() {
 
     switch (choice) {
         case '1':
+            clearInputBuffer();
             break;
         case '2':
             exit(0);
