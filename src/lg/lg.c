@@ -184,6 +184,10 @@ void guesser(const char *correctAnswer) {
     printf("Enter your answer: \n");
 
     fgets(input, sizeof(input), stdin);
+    size_t len = strlen(input);
+        if (len > 0 && input[len - 1] == '\n') {
+            input[len - 1] = '\0';
+        }
     
     int result = strcmp(input, correctAnswer);
 
@@ -211,7 +215,7 @@ int main() {
 
     srand(time(NULL));
 
-    int randomIndex = 1; //rand() % lyricsList.count;
+    int randomIndex = rand() % lyricsList.count;
 
     // Allocate memory for entire path including ".txt" and "/"
     char *lyricsPath = (char*)malloc((strlen(directory) + strlen(lyricsList.array[randomIndex]) + 6) * sizeof(char));
