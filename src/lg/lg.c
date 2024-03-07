@@ -59,7 +59,7 @@ void menu() {
             exit(0);
             break;
         default:
-            perror("Invalid choice. Please try again.\n");
+            printf("Invalid choice. Please try again.\n");
             sleep(2);
             menu();
             break;
@@ -215,7 +215,7 @@ int main() {
     LyricsStruct lyricsList = generateLyricsList(directory);
     
     if (lyricsList.array == NULL || lyricsList.count == 0) {
-        perror("Failed to generate or empty lyrics list.\n");
+        perror("Failed to generate or empty lyrics list.");
         return 1;
     }
 
