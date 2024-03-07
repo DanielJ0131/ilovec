@@ -92,6 +92,7 @@ LyricsStruct generateLyricsList(const char *directory) {
         }
     }
     printf("Files found: %d\n", fileCount);
+    printf("========================\n\n");
 
     // Allocate memory for an array of strings
     char **lyricsList = (char**)malloc((size_t)fileCount * sizeof(char*));
@@ -182,12 +183,39 @@ void freeLyricsList(char **lyricsList, int size) {
     free(lyricsList);
 }
 
+void hintAddLine() {
+
+}
+
+void hints() {
+    clearScreen();
+    printf("Hints available:\n");
+    printf("1. See next line of lyrics\n");
+    printf("2. Cancel\n");
+    char choice;
+    printf("Enter your choice: ");
+    scanf(" %c", &choice);
+
+    switch (choice) {
+        case '1':
+            hintAddLine();
+            break;
+        case '2':
+            break;
+        default:
+            printf("Invalid choice. Please try again.\n");
+            sleep(2);
+            hints();
+            break;
+    }
+}
+
 // Function to parse user input for correct answer
-void guesser(const char *correctAnswer) {
+int guesser(const char *correctAnswer) {
     char input[35];
 
-    printf("Which song is this?\n");
     printf("Enter your answer: \n");
+    printf("Alternatively, enter \"1\" for hints.\n");
 
     fgets(input, sizeof(input), stdin);
     size_t len = strlen(input);
@@ -195,15 +223,20 @@ void guesser(const char *correctAnswer) {
             input[len - 1] = '\0';
         }
     
-    int result = strcmp(input, correctAnswer);
-
-    if (result == 0) {
-        printf("Correct!\n");
+    if (input[0] == '1') {
+        return 0;
     } else {
-        printf("Incorrect. Try again.\n");
-        sleep(1);
-        guesser(correctAnswer);
+        int result = strcmp(input, correctAnswer);
+
+        if (result == 0) {
+            printf("Correct!\n");
+        } else {
+            printf("Incorrect. Try again.\n");
+            sleep(1);
+            return guesser(correctAnswer);
+        }
     }
+    return 1;
 }
 
 int main() {
@@ -258,10 +291,13 @@ int main() {
     // Generate a random index within the range of lyricsCount
     randomIndex = rand() % lyrics.count;
 
+    printf("Which song is this?\n");
     // Print out the randomly selected line of lyric
     printf("%s\n", lyrics.array[randomIndex]);
 
-    guesser(correctAnswer);
+    while (guesser(correctAnswer) == 0) {
+        hints();
+    }
 
     free(correctAnswer);
 
