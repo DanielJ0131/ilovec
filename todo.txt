@@ -15,5 +15,6 @@ lyrics guesser (S3RL game)
 3. modes; multiple choice, who-is-singing
 4. difficulties (easy - more lyrics shown)
 5. points system based on hints used and difficulty
-(6. random "question" (Song goes like..., Which song is this, guess this song, do you know this one?) - use *strings[])
+6. add more artists, choose artist at start 
+(7. random "question" (Song goes like..., Which song is this, guess this song, do you know this one?) - use *strings[])
 =====================================================================================================================
