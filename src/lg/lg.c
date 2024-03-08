@@ -176,18 +176,18 @@ LyricsStruct generateLyrics(FILE *file) {
 }
 
 // Function to free the memory allocated for the list of strings
-void freeLyricsList(char **lyricsList, int size) {
-    for (int i = 0; i < size; i++) {
-        free(lyricsList[i]);
+void freeLyricsStruct(char **array, int count) {
+    for (int i = 0; i < count; i++) {
+        free(array[i]);
     }
-    free(lyricsList);
+    free(array);
 }
 
 void hintAddLine() {
 
 }
 
-void hints() {
+int hints() {
     clearScreen();
     printf("Hints available:\n");
     printf("1. See next line of lyrics\n");
@@ -198,16 +198,19 @@ void hints() {
 
     switch (choice) {
         case '1':
-            hintAddLine();
-            break;
+            clearInputBuffer();
+            return 1;
         case '2':
-            break;
+            clearInputBuffer();
+            return 0;
         default:
             printf("Invalid choice. Please try again.\n");
             sleep(2);
+            clearInputBuffer();
             hints();
-            break;
+            return 0;
     }
+    return 0;
 }
 
 // Function to parse user input for correct answer
@@ -284,7 +287,7 @@ int main() {
     }
 
     // Free the allocated memory from generateLyricsList()
-    freeLyricsList(lyricsList.array, lyricsList.count);
+    freeLyricsStruct(lyricsList.array, lyricsList.count);
 
     srand(time(NULL));
 
@@ -300,6 +303,7 @@ int main() {
     }
 
     free(correctAnswer);
+    freeLyricsStruct(lyrics.array, lyrics.count);
 
     printf("hello obama\n");
     return 0;
