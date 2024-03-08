@@ -199,9 +199,11 @@ int hints() {
     switch (choice) {
         case '1':
             clearInputBuffer();
+            clearScreen();
             return 1;
         case '2':
             clearInputBuffer();
+            clearScreen();
             return 0;
         default:
             printf("Invalid choice. Please try again.\n");
@@ -217,7 +219,7 @@ int hints() {
 int guesser(const char *correctAnswer) {
     char input[35];
 
-    printf("Enter your answer: \n");
+    printf("\nEnter your answer: \n");
     printf("Alternatively, enter \"1\" for hints.\n");
 
     fgets(input, sizeof(input), stdin);
@@ -257,7 +259,7 @@ int main() {
 
     srand(time(NULL));
 
-    int randomIndex = rand() % lyricsList.count;
+    int randomIndex = 2;//rand() % lyricsList.count;
 
     // Allocate memory for entire path including ".txt" and "/"
     char *lyricsPath = (char*)malloc((strlen(directory) + strlen(lyricsList.array[randomIndex]) + 6) * sizeof(char));
@@ -292,14 +294,27 @@ int main() {
     srand(time(NULL));
 
     // Generate a random index within the range of lyricsCount
-    randomIndex = rand() % lyrics.count;
+    randomIndex = 27;//rand() % lyrics.count;
 
-    printf("Which song is this?\n");
+    printf("Which song is this?\n\n");
     // Print out the randomly selected line of lyric
     printf("%s\n", lyrics.array[randomIndex]);
 
+    int hintValue = 0;
     while (guesser(correctAnswer) == 0) {
-        hints();
+        if (randomIndex == (lyrics.count - 1)) {
+            printf("Last line reached. Printing first line instead.");
+            randomIndex = 0;
+            printf("%s", lyrics.array[(lyrics.count - 1)]);
+        }
+        if (hints() != 0) {
+            hintValue++;
+            printf("Which song is this?\n\n");
+            for (int i = 0; i <= hintValue; i++) {
+                printf("%s\n", lyrics.array[randomIndex]);
+                randomIndex++;
+            }
+        } 
     }
 
     free(correctAnswer);
