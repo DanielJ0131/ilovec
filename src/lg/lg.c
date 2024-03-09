@@ -56,6 +56,7 @@ void menu() {
             clearInputBuffer();
             break;
         case '2':
+            printf("Thanks for playing! Obama was here 2024\n");
             exit(0);
             break;
         default:
@@ -231,6 +232,7 @@ int guesser(const char *correctAnswer) {
 
         if (result == 0) {
             printf("Correct!\n");
+            sleep(1);
         } else {
             printf("Incorrect. Try again.\n");
             sleep(1);
@@ -269,95 +271,96 @@ void printLines(char **array, int count, int hintsUsed, int index) {
 }
 
 int main() {
-    menu();
-    clearScreen();
+    while (1) {
+        menu();
+        clearScreen();
 
-    // Define the paths to the lyrics
-    const char *directory = "lyrics"; // Set directory path
-    LyricsStruct lyricsList = generateLyricsList(directory);
+        // Define the paths to the lyrics
+        const char *directory = "lyrics"; // Set directory path
+        LyricsStruct lyricsList = generateLyricsList(directory);
     
-    if (lyricsList.array == NULL || lyricsList.count == 0) {
-        perror("Failed to generate or empty lyrics list.");
-        return 1;
-    }
+        if (lyricsList.array == NULL || lyricsList.count == 0) {
+            perror("Failed to generate or empty lyrics list.");
+            return 1;
+        }
 
-    // FOR DEBUGGING
-    // for (int i = 0; i <= lyricsList.count - 1; i++) {
-    //     printf("%d: %s", (i + 1), lyricsList.array[i]);
-    // }
-    // return 0;
+        // FOR DEBUGGING
+        // for (int i = 0; i <= lyricsList.count - 1; i++) {
+        //     printf("%d: %s", (i + 1), lyricsList.array[i]);
+        // }
+        // return 0;
 
-    srand(time(NULL));
+        srand(time(NULL));
 
-    int randomIndex = rand() % lyricsList.count;
+        int randomIndex = rand() % lyricsList.count;
 
-    // Allocate memory for entire path including ".txt" and "/"
-    char *lyricsPath = (char*)malloc((strlen(directory) + strlen(lyricsList.array[randomIndex]) + 6) * sizeof(char));
+        // Allocate memory for entire path including ".txt" and "/"
+        char *lyricsPath = (char*)malloc((strlen(directory) + strlen(lyricsList.array[randomIndex]) + 6) * sizeof(char));
 
-    // Prefix directory path to chosen .txt file
-    sprintf(lyricsPath, "%s/%s.txt", directory, lyricsList.array[randomIndex]);
+        // Prefix directory path to chosen .txt file
+        sprintf(lyricsPath, "%s/%s.txt", directory, lyricsList.array[randomIndex]);
 
-    // Open the file unless it doesn't exist
-    FILE *file = fopen(lyricsPath, "r");
-    if (file == NULL) {
-        printf("Failed to open the file.\n");
-        sleep(2);
-        main();
-    }
+        // Open the file unless it doesn't exist
+        FILE *file = fopen(lyricsPath, "r");
+        if (file == NULL) {
+            printf("Failed to open the file.\n");
+            sleep(2);
+            main();
+        }
 
-    LyricsStruct lyrics = generateLyrics(file);
+        LyricsStruct lyrics = generateLyrics(file);
 
-    // Close the file
-    fclose(file);
+        // Close the file
+        fclose(file);
     
-    // Allocate memory and store answer before freeing lyricsList
-    char *correctAnswer = (char*)malloc((strlen(lyricsList.array[randomIndex]) + 1) * sizeof(char));
-    if (correctAnswer == NULL) {
-        perror("Error allocating memory for correctAnswer");
-    } else {
-        strcpy(correctAnswer, lyricsList.array[randomIndex]); 
-    }
+        // Allocate memory and store answer before freeing lyricsList
+        char *correctAnswer = (char*)malloc((strlen(lyricsList.array[randomIndex]) + 1) * sizeof(char));
+        if (correctAnswer == NULL) {
+            perror("Error allocating memory for correctAnswer");
+        } else {
+            strcpy(correctAnswer, lyricsList.array[randomIndex]); 
+        }
 
-    // Free the allocated memory from generateLyricsList()
-    freeLyricsStruct(lyricsList.array, lyricsList.count);
+        // Free the allocated memory from generateLyricsList()
+        freeLyricsStruct(lyricsList.array, lyricsList.count);
 
-    srand(time(NULL));
+        srand(time(NULL));
 
-    // Generate a random index within the range of lyricsCount
-    randomIndex = rand() % lyrics.count;
+        // Generate a random index within the range of lyricsCount
+        randomIndex = rand() % lyrics.count;
 
-    int hintsUsed = 0;
+        int hintsUsed = 0;
 
-    printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
+        printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
 
-    // Loop until correct
-    while (guesser(correctAnswer) == 0) {
+        // Loop until correct
+        while (guesser(correctAnswer) == 0) {
 
-        // Print out lines based on hints
-        if (hints() != 0) {
+            // Print out lines based on hints
+            if (hints() != 0) {
 
-            if ((randomIndex + hintsUsed) == (lyrics.count - 1)) {
-                printf("Last line reached. Printing first line instead.\n");
-            }
+                if ((randomIndex + hintsUsed) == (lyrics.count - 1)) {
+                    printf("Last line reached. Printing first line instead.\n");
+                }
 
-            if (hintsUsed <= (lyrics.count - 1)) {
-                hintsUsed++;
-                printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
+                if (hintsUsed <= (lyrics.count - 1)) {
+                    hintsUsed++;
+                    printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
+
+                } else {
+
+                    printf("Maximum number of hints reached. Please make a guess.\n");
+                    printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
+                }
 
             } else {
-
-                printf("Maximum number of hints reached. Please make a guess.\n");
                 printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
             }
-
-        } else {
-            printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
         }
+
+        free(correctAnswer);
+        freeLyricsStruct(lyrics.array, lyrics.count);
     }
 
-    free(correctAnswer);
-    freeLyricsStruct(lyrics.array, lyrics.count);
-
-    printf("Thanks for playing! Obama was here 2024\n");
     return 0;
 }
