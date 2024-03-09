@@ -219,7 +219,7 @@ int hints() {
 int guesser(const char *correctAnswer) {
     char input[35];
 
-    printf("\nEnter your answer: \n");
+    printf("Enter your answer: \n");
     printf("Alternatively, enter \"1\" for hints.\n");
 
     fgets(input, sizeof(input), stdin);
@@ -296,25 +296,56 @@ int main() {
     // Generate a random index within the range of lyricsCount
     randomIndex = rand() % lyrics.count;
 
+    clearScreen();
     printf("Which song is this?\n\n");
+
     // Print out the randomly selected line of lyric
-    printf("%s\n", lyrics.array[randomIndex]);
+    printf("%s\n\n", lyrics.array[randomIndex]);
 
     int hintsUsed = 0;
+    // Loop until correct
     while (guesser(correctAnswer) == 0) {
-        if (randomIndex == (lyrics.count - 1)) {
-            printf("Last line reached. Printing first line instead.");
-            randomIndex = 0;
-            printf("%s\n", lyrics.array[(lyrics.count - 1)]);
-        }
+        // Print out lines based on hints
         if (hints() != 0) {
-            hintsUsed++;
-            printf("Which song is this?\n\n");
-            for (int i = 0; i <= hintsUsed; i++) {
-                printf("%s\n", lyrics.array[randomIndex]);
-                randomIndex++;
+
+            if ((randomIndex + hintsUsed) == (lyrics.count - 1)) {
+                printf("Last line reached. Printing first line instead.\n");
             }
-        } 
+
+            if ((randomIndex + hintsUsed) >= (lyrics.count - 1)) {
+                hintsUsed++;
+                printf("Which song is this?\n\n");
+
+                // Print from first element
+                for (int i = 0; i <= (randomIndex + hintsUsed - lyrics.count); i++) {
+                    printf("%s\n", lyrics.array[i]);
+                }
+                printf("\n");
+                // Print until last element
+                for (int i = 0; i <= (lyrics.count - randomIndex - 1); i++) {
+                    printf("%s\n", lyrics.array[(randomIndex + i)]);
+                }
+                printf("\n");
+
+            } else {
+                hintsUsed++;
+                printf("Which song is this?\n\n");
+
+                for (int i = 0; i <= hintsUsed; i++) {
+                    printf("%s\n", lyrics.array[randomIndex + i]);
+                }
+                printf("\n");
+            }
+        } else {
+            printf("Which song is this?\n\n");
+
+            // Print based on hints used
+            for (int i = 0; i <= hintsUsed; i++) {
+                printf("%s\n", lyrics.array[(randomIndex + i)]);
+            }
+            printf("\n");
+
+        }
     }
 
     free(correctAnswer);
