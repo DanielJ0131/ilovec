@@ -326,7 +326,6 @@ int main() {
     // Generate a random index within the range of lyricsCount
     randomIndex = rand() % lyrics.count;
 
-    clearScreen();
     int hintsUsed = 0;
 
     printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
@@ -359,6 +358,6 @@ int main() {
     free(correctAnswer);
     freeLyricsStruct(lyrics.array, lyrics.count);
 
-    printf("hello obama\n");
+    printf("Thanks for playing! Obama was here 2024\n");
     return 0;
 }
