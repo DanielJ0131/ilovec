@@ -183,10 +183,6 @@ void freeLyricsStruct(char **array, int count) {
     free(array);
 }
 
-void hintAddLine() {
-
-}
-
 int hints() {
     clearScreen();
     printf("Hints available:\n");
@@ -244,6 +240,34 @@ int guesser(const char *correctAnswer) {
     return 1;
 }
 
+// Print lines based on hints used
+void printLines(char **array, int count, int hintsUsed, int index) {
+    printf("Which song is this?\n\n");
+
+    printf("\033[1;32m");
+    if (index + hintsUsed >= count) {
+
+        // Print from first element
+        for (int i = 0; i <= (index + hintsUsed - count); i++) {
+            printf("%s\n", array[i]);
+        }
+        printf("\n");
+
+        // Print until last element
+        for (int i = 0; i <= (count - index - 1); i++) {
+            printf("%s\n", array[(index + i)]);
+        }
+        printf("\n");
+    } else {
+            for (int i = 0; i <= hintsUsed; i++) {
+            printf("%s\n", array[(index + i)]);
+        }
+        printf("\n"); 
+    }
+    printf("\033[0m");
+
+}
+
 int main() {
     menu();
     clearScreen();
@@ -256,6 +280,12 @@ int main() {
         perror("Failed to generate or empty lyrics list.");
         return 1;
     }
+
+    // FOR DEBUGGING
+    // for (int i = 0; i <= lyricsList.count - 1; i++) {
+    //     printf("%d: %s", (i + 1), lyricsList.array[i]);
+    // }
+    // return 0;
 
     srand(time(NULL));
 
@@ -297,14 +327,13 @@ int main() {
     randomIndex = rand() % lyrics.count;
 
     clearScreen();
-    printf("Which song is this?\n\n");
-
-    // Print out the randomly selected line of lyric
-    printf("%s\n\n", lyrics.array[randomIndex]);
-
     int hintsUsed = 0;
+
+    printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
+
     // Loop until correct
     while (guesser(correctAnswer) == 0) {
+
         // Print out lines based on hints
         if (hints() != 0) {
 
@@ -312,39 +341,18 @@ int main() {
                 printf("Last line reached. Printing first line instead.\n");
             }
 
-            if ((randomIndex + hintsUsed) >= (lyrics.count - 1)) {
+            if (hintsUsed <= (lyrics.count - 1)) {
                 hintsUsed++;
-                printf("Which song is this?\n\n");
-
-                // Print from first element
-                for (int i = 0; i <= (randomIndex + hintsUsed - lyrics.count); i++) {
-                    printf("%s\n", lyrics.array[i]);
-                }
-                printf("\n");
-                // Print until last element
-                for (int i = 0; i <= (lyrics.count - randomIndex - 1); i++) {
-                    printf("%s\n", lyrics.array[(randomIndex + i)]);
-                }
-                printf("\n");
+                printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
 
             } else {
-                hintsUsed++;
-                printf("Which song is this?\n\n");
 
-                for (int i = 0; i <= hintsUsed; i++) {
-                    printf("%s\n", lyrics.array[randomIndex + i]);
-                }
-                printf("\n");
+                printf("Maximum number of hints reached. Please make a guess.\n");
+                printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
             }
+
         } else {
-            printf("Which song is this?\n\n");
-
-            // Print based on hints used
-            for (int i = 0; i <= hintsUsed; i++) {
-                printf("%s\n", lyrics.array[(randomIndex + i)]);
-            }
-            printf("\n");
-
+            printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
         }
     }
 
