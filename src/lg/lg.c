@@ -343,7 +343,7 @@ int main() {
                     printf("Last line reached. Printing first line instead.\n");
                 }
 
-                if (hintsUsed <= (lyrics.count - 1)) {
+                if (hintsUsed < (lyrics.count - 1)) {
                     hintsUsed++;
                     printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
 
