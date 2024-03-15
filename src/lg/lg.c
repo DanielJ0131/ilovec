@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 
 #define MAX_LENGTH 300
 
@@ -65,44 +66,6 @@ void menu() {
             menu();
             break;
     }
-}
-
-// Prompt user to set difficulty
-int setDifficulty(){
-    char choice;
-    printf("Please choose a difficulty.\n");
-    printf("\n");
-    printf("1. Easy        2. Medium\n");
-    printf("3. Hard        4. Master\n");
-    printf("Enter your choice: ");
-    scanf(" %c", &choice);
-
-    switch (choice) {
-        case '1':
-            clearInputBuffer();
-            clearScreen();
-            return 8;
-        case '2':
-            clearInputBuffer();
-            clearScreen();
-            return 4;
-        case '3':
-            clearInputBuffer();
-            clearScreen();
-            return 2;
-        case '4':
-            clearInputBuffer();
-            clearScreen();
-            return 1;
-        default:
-            printf("Invalid choice. Please try again.\n");
-            sleep(1);
-            clearInputBuffer();
-            clearScreen();
-            setDifficulty();
-            return 0;
-    }
-    return 0;
 }
 
 // Structure to hold both array and number of elements
@@ -222,6 +185,45 @@ void freeLyricsStruct(char **array, int count) {
     free(array);
 }
 
+// Prompt user to set difficulty
+int setDifficulty(){
+    char choice;
+    printf("Please choose a difficulty.\n");
+    printf("\n");
+    printf("1. Easy        2. Medium\n");
+    printf("3. Hard        4. Master\n");
+    printf("Enter your choice: ");
+    scanf(" %c", &choice);
+
+    // Returns amount of lines shown
+    switch (choice) {
+        case '1':
+            clearInputBuffer();
+            clearScreen();
+            return 8;
+        case '2':
+            clearInputBuffer();
+            clearScreen();
+            return 4;
+        case '3':
+            clearInputBuffer();
+            clearScreen();
+            return 2;
+        case '4':
+            clearInputBuffer();
+            clearScreen();
+            return 1;
+        default:
+            printf("Invalid choice. Please try again.\n");
+            sleep(1);
+            clearInputBuffer();
+            clearScreen();
+            setDifficulty();
+            return 0;
+    }
+    return 0;
+}
+
 int hints() {
     clearScreen();
     printf("Hints available:\n");
@@ -267,7 +269,22 @@ int guesser(const char *songName) {
         if (len > 0 && input[len - 1] == '\n') {
             input[len - 1] = '\0';
         }
-    
+
+    // Process the input string
+    for (int i = 0; input[i] != '\0'; i++) {
+        // Convert uppercase characters to lowercase
+        if (isupper(input[i])) {
+            input[i] = tolower(input[i]);
+        }
+        // Remove spaces by shifting characters
+        if (input[i] == ' ' || input[i] == '\'') {
+            for (int j = i; input[j] != '\0'; j++) {
+                input[j] = input[j + 1];
+            }
+            i--; // Move back one position to recheck the current character
+        }
+    } 
+
     if (input[0] == '1') {
         return 0;
     } else {
@@ -333,7 +350,7 @@ int main() {
 
         // FOR DEBUGGING
         // for (int i = 0; i <= lyricsList.count - 1; i++) {
-        //     printf("%d: %s", (i + 1), lyricsList.array[i]);
+        //     printf("%d: %s\n", i, lyricsList.array[i]);
         // }
         // return 0;
 
