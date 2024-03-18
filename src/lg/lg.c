@@ -185,13 +185,43 @@ void freeLyricsStruct(char **array, int count) {
     free(array);
 }
 
+int chooseMode() {
+    char choice;
+    printf("Please choose a mode.\n");
+    printf("\n");
+    printf("1. Normal        2. Multiple Choice\n");
+    printf("\n");
+    printf("Enter your choice: ");
+    scanf(" %c", &choice);
+
+    switch (choice) {
+        case '1':
+            clearInputBuffer();
+            clearScreen();
+            return 1;
+        case '2':
+            clearInputBuffer();
+            clearScreen();
+            return 0;
+        default:
+            printf("Invalid choice. Please try again.\n");
+            sleep(1);
+            clearInputBuffer();
+            clearScreen();
+            chooseMode();
+            return 0;
+    }
+    return 0;
+}
+
 // Prompt user to set difficulty
-int setDifficulty(){
+int setDifficulty() {
     char choice;
     printf("Please choose a difficulty.\n");
     printf("\n");
     printf("1. Easy        2. Medium\n");
     printf("3. Hard        4. Master\n");
+    printf("\n");
     printf("Enter your choice: ");
     scanf(" %c", &choice);
 
@@ -257,12 +287,12 @@ int hints() {
     return 0;
 }
 
-// Function to parse user input for correct answer
+// Parse user input in Normal mode
 int guesser(const char *songName) {
     char input[35];
 
     printf("Enter your answer: \n");
-    printf("Alternatively, enter \"1\" for hints.\n");
+    printf("Alternatively, enter \"h\" for hints.\n");
 
     fgets(input, sizeof(input), stdin);
     size_t len = strlen(input);
@@ -276,7 +306,7 @@ int guesser(const char *songName) {
         if (isupper(input[i])) {
             input[i] = tolower(input[i]);
         }
-        // Remove spaces by shifting characters
+        // Remove spaces and single quotes by shifting characters
         if (input[i] == ' ' || input[i] == '\'') {
             for (int j = i; input[j] != '\0'; j++) {
                 input[j] = input[j + 1];
@@ -285,7 +315,7 @@ int guesser(const char *songName) {
         }
     } 
 
-    if (input[0] == '1') {
+    if (input[0] == 'h' && input[1] == '\0') {
         return 0;
     } else {
         int result = strcmp(input, songName);
@@ -302,33 +332,109 @@ int guesser(const char *songName) {
     return 1;
 }
 
+
+// Parse user input in Multiple Choice mode
+int guesserMultipleChoice(LyricsStruct lyrics, int correctIndex, int randomValue) {
+
+    int optionsAmount = 4;
+    int numbers[optionsAmount];
+    int i, j, isUnique;
+    char choice;
+    srand(randomValue);
+
+    // Set correct answer
+    int correctChoice = rand() % optionsAmount;
+    numbers[correctChoice] = correctIndex;
+
+    // Choose unique indices
+    for (i = 0; i < (optionsAmount); i++) {
+        if (i == correctChoice) continue;
+
+        do {
+           numbers[i] = rand() % lyrics.count;
+           isUnique = 1; // Assume number is unique
+
+           // Check if number is unique
+           for (j = 0; j < i; j++) {
+                if (numbers[i] == numbers[j] || numbers[i] == correctIndex) {
+                    isUnique = 0;
+                    break;
+                }
+           }
+        } while (!isUnique); // Repeat if number is not unique
+    }
+
+    printf("1. %s        ", lyrics.array[numbers[0]]);
+    printf("2. %s\n", lyrics.array[numbers[1]]);
+    printf("3. %s        ", lyrics.array[numbers[2]]);
+    printf("4. %s\n", lyrics.array[numbers[3]]);
+    printf("Enter your choice: \n");
+    printf("Alternatively, enter \"h\" for hints.\n");
+    scanf(" %c", &choice);
+
+
+    if (choice == 'h') {
+        return 0;
+    } else {
+
+        // Subtract ASCII value from choice to get integer value
+        if (choice - '0' - 1 == correctChoice) {
+            printf("Correct!\n");
+            sleep(1);
+            clearInputBuffer();
+        } else if (0 < choice && choice <= optionsAmount) {
+            printf("Incorrect. Please try again.\n");
+            sleep(1);
+            clearInputBuffer();
+            return guesserMultipleChoice(lyrics, correctIndex, randomValue);
+        } else {
+            printf("Invalid choice. Please try again.\n");
+            sleep(1);
+            clearInputBuffer();
+            return guesserMultipleChoice(lyrics, correctIndex, randomValue);
+        }
+
+    }
+    
+    return 1;
+}
+
 // Print lines based on hints used
-void printLines(char **array, int count, int hintsUsed, int index) {
+  void printLines(LyricsStruct lyrics, int hintsUsed, int index) {
+    int i;
+
     printf("Which song is this?\n\n");
 
+    if ((index + hintsUsed) == (lyrics.count - 1)) {
+      printf("Last line reached. Printing from first line.\n");
+    }
+
+    if (hintsUsed >= (lyrics.count - 1)) {
+      printf("Maximum number of lines printed. Please make a guess.\n");
+    }
+
     printf("\033[1;32m"); // Green color
-    if (index + hintsUsed >= count) {
+    if (index + hintsUsed >= lyrics.count) {
 
-        // Print from first element
-        for (int i = 0; i <= (index + hintsUsed - count); i++) {
-            printf("%s\n", array[i]);
-        }
-        printf("\n");
+      // Print from first element
+      for (i = 0; i <= (index + hintsUsed - lyrics.count); i++) {
+        printf("%s\n", lyrics.array[i]);
+      }
+      printf("\n");
 
-        // Print until last element
-        for (int i = 0; i <= (count - index - 1); i++) {
-            printf("%s\n", array[(index + i)]);
-        }
-        printf("\n");
+      // Print until last element
+      for (i = 0; i <= (lyrics.count - index - 1); i++) {
+        printf("%s\n", lyrics.array[(index + i)]);
+      }
+      printf("\n");
     } else {
-            for (int i = 0; i <= hintsUsed; i++) {
-            printf("%s\n", array[(index + i)]);
-        }
-        printf("\n"); 
+      for (i = 0; i <= hintsUsed; i++) {
+        printf("%s\n", lyrics.array[(index + i)]);
+      }
+      printf("\n");
     }
     printf("\033[0m");
-
-}
+  }
 
 void printReleaseDate(const char *songName) {
     printf("Not yet implemented.\n");
@@ -340,7 +446,7 @@ int main() {
         clearScreen();
 
         // Define the paths to the lyrics
-        const char *directory = "lyrics/s3rl"; // Set directory path
+        const char *directory = "lyrics/sanusia"; // Set directory path
         LyricsStruct lyricsList = generateLyricsList(directory);
     
         if (lyricsList.array == NULL || lyricsList.count == 0) {
@@ -356,13 +462,13 @@ int main() {
 
         srand(time(NULL));
 
-        int randomIndex = rand() % lyricsList.count;
+        int randomFileIndex = rand() % lyricsList.count;
 
         // Allocate memory for entire path including ".txt" and "/"
-        char *lyricsPath = (char*)malloc((strlen(directory) + strlen(lyricsList.array[randomIndex]) + 6) * sizeof(char));
+        char *lyricsPath = (char*)malloc((strlen(directory) + strlen(lyricsList.array[randomFileIndex]) + 6) * sizeof(char));
 
         // Prefix directory path to chosen .txt file
-        sprintf(lyricsPath, "%s/%s.txt", directory, lyricsList.array[randomIndex]);
+        sprintf(lyricsPath, "%s/%s.txt", directory, lyricsList.array[randomFileIndex]);
 
         // Open the file unless it doesn't exist
         FILE *file = fopen(lyricsPath, "r");
@@ -378,60 +484,72 @@ int main() {
         fclose(file);
     
         // Allocate memory and store answer before freeing lyricsList
-        char *correctAnswer = (char*)malloc((strlen(lyricsList.array[randomIndex]) + 1) * sizeof(char));
+        char *correctAnswer = (char*)malloc((strlen(lyricsList.array[randomFileIndex]) + 1) * sizeof(char));
         if (correctAnswer == NULL) {
             perror("Error allocating memory for correctAnswer");
         } else {
-            strcpy(correctAnswer, lyricsList.array[randomIndex]); 
+            strcpy(correctAnswer, lyricsList.array[randomFileIndex]); 
         }
 
-        // Free the allocated memory from generateLyricsList()
-        freeLyricsStruct(lyricsList.array, lyricsList.count);
+          int randomLineIndex = rand() % lyrics.count;
 
-        srand(time(NULL));
+          // Choose mode and change hintsUsed based on difficulty chosen
+          if (chooseMode() == 0) {
 
-        // Generate a random index within the range of lyricsCount
-        randomIndex = rand() % lyrics.count;
+            int hintsUsed = (setDifficulty() - 1);
 
-        // Change hintsUsed based on difficulty chosen
-        int hintsUsed = (setDifficulty() - 1);
+            printLines(lyrics, hintsUsed, randomLineIndex);
 
-        printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
+            // Set constant randomValue for while loop
+            int randomValue = rand();
 
-        // Loop until correct
-        while (guesser(correctAnswer) == 0) {
+            while (guesserMultipleChoice(lyricsList, randomFileIndex, randomValue) == 0) {
 
-            // Print out lines based on hints
-            int hintValue = hints();
-            if (hintValue == 1) {
+                // Print out lines based on hints
+                int hintValue = hints();
 
-                if ((randomIndex + hintsUsed) == (lyrics.count - 1)) {
-                    printf("Last line reached. Printing from first line.\n");
-                }
+                if (hintValue == 1) {
 
-                if (hintsUsed < (lyrics.count - 1)) {
                     hintsUsed++;
-                    printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
+                    printLines(lyrics, hintsUsed, randomLineIndex);
+
+                } else if (hintValue == 2) {
+
+                    printReleaseDate(correctAnswer);
+                    printLines(lyrics, hintsUsed, randomLineIndex);
 
                 } else {
 
-                    printf("Maximum number of lines printed. Please make a guess.\n");
-                    printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
+                    printLines(lyrics, hintsUsed, randomLineIndex);
                 }
+            }
 
-            } else if (hintValue == 2) {
-                printReleaseDate(correctAnswer);
-                printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
+            freeLyricsStruct(lyricsList.array, lyricsList.count);
 
-            } else {
-                printLines(lyrics.array, lyrics.count, hintsUsed, randomIndex);
+        } else {
 
+            int hintsUsed = (setDifficulty() - 1);
+
+            freeLyricsStruct(lyricsList.array, lyricsList.count);
+
+            printLines(lyrics, hintsUsed, randomLineIndex);
+
+            // Loop until correct (normal mode)
+            while (guesser(correctAnswer) == 0) {
+
+                // Print out lines based on hints
+                int hintValue = hints();
+
+                if (hintValue == 1) {
+                    hintsUsed++;
+                } else if (hintValue == 2) {
+                    printReleaseDate(correctAnswer);
+                }
+                printLines(lyrics, hintsUsed, randomLineIndex);
             }
         }
-
         free(correctAnswer);
         freeLyricsStruct(lyrics.array, lyrics.count);
     }
-
     return 0;
 }
