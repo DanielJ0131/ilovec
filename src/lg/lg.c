@@ -446,7 +446,7 @@ int main() {
         clearScreen();
 
         // Define the paths to the lyrics
-        const char *directory = "lyrics/sanusia"; // Set directory path
+        const char *directory = "lyrics/s3rl"; // Set directory path
         LyricsStruct lyricsList = generateLyricsList(directory);
     
         if (lyricsList.array == NULL || lyricsList.count == 0) {
