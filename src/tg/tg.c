@@ -84,67 +84,122 @@ LyricsStruct generateTrackList(const char *directory) {
     return result;
 }
 
+// Function to free the memory allocated for the list of strings
+void freeLyricsStruct(char **array, int count) {
+    for (int i = 0; i < count; i++) {
+        free(array[i]);
+    }
+    free(array);
+}
+
 bool isInsideButton(int x, int y, SDL_Rect button) {
     return (x >= button.x && x <= button.x + button.w &&
             y >= button.y && y <= button.y + button.h);
 }
 
-void renderText(SDL_Renderer* renderer, int x, int y, const char *str, TTF_Font* font) {
+char** createSubstrings(const char *str) {
 
-    //int length = strlen(str);
-    //if (length > 15) {
-    //    int start = 0; // Starting index of current substring
-    //    int end = 0;   // Ending index of current substring
-    //    int substringIndex = 0;
-    //    char *substrings[2];
-
-    //    while (start < length) {
-    //        // Move end to last possible character or end of string, whichever comes first
-    //        end = start + 14;
-    //        if (end >= length) {
-    //            end = length - 1;
-    //        } else {
-    //            // Move end backward until a space is found or the next character is a space
-    //            end++;
-    //            while (end > start && str[end] != ' ') {
-    //                end--;
-    //            }
-    //        }
-    //        // Allocate memory for the substring
-    //        substrings[substringIndex] = malloc((end - start + 2) * sizeof(char)); // +2 for the null terminator
-    //    
-    //        // Copy the substring into the allocated memory
-    //        strncpy(substrings[substringIndex], str + start, end - start + 1);
-    //        substrings[substringIndex][end - start + 1] = '\0'; // Null-terminate the substring
-    //    
-    //        // Move start to the next non-space character after end
-    //        while (end < length && str[end] == ' ') {
-    //            end++;
-    //        }
-    //        start = end; // Set start to end for the next substring
-    //        substringIndex++; // Move to the next index in the substrings array
-    //    }
-    //}
-
-    SDL_Color color = {0, 0, 0}; // Black color
-    SDL_Surface* textSurface = TTF_RenderText_Blended(font, str, color);
-    if (!textSurface) {
-        perror("Error rendering surface");
+    int length = strlen(str);
+    int numSubstrings = length / 15; // Integer division to calculate the number of full substrings
+    if (length % 15 != 0) {
+        numSubstrings++; // Increment the number of substrings if there's a remainder
+    }
+    char **substrings = malloc((numSubstrings + 2) * sizeof(char*));
+    if (substrings == NULL) {
+        fprintf(stderr, "Memory allocation failed for substrings\n");
+        exit(1); // Exit the program with an error code
     }
 
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    SDL_FreeSurface(textSurface); // Free the surface after creating the texture
+    if (numSubstrings > 1) {
 
-    // Get the dimensions of the rendered text
-    int textWidth, textHeight;
-    SDL_QueryTexture(textTexture, NULL, NULL, &textWidth, &textHeight);
+        int start = 0; // Starting index of current substring
+        int end = 0;   // Ending index of current substring
+        int substringIndex = 0;
 
-    // Create a destination rectangle for rendering the text texture
-    SDL_Rect textRect = {x, y, textWidth, textHeight};
+        while (start < length) {
+            // Move end to last possible character or end of string, whichever comes first
+            end = start + 14;
+            if (end >= length - 1) {
+                end = length - 1;
+            } else {
+                // Move end backward until a space is found
+                end++; // Check after last character, if end is at the end of a word
+                while (end > start && str[end] != ' ') {
+                    end--;
+                }
+                end--; // Place end on last character of the word
+            }
 
-    // Render the text texture onto the screen
-    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
-    SDL_DestroyTexture(textTexture);
+            // Allocate memory for the substring
+            substrings[substringIndex] = malloc((end - start + 2) * sizeof(char)); // +2 for null terminator and 0th index
+            if (substrings[substringIndex] == NULL) {
+                fprintf(stderr, "Memory allocation failed for substring %d\n", substringIndex);
+                exit(1); // Exit the program with an error code
+            }
+        
+            // Copy the substring into the allocated memory
+            strncpy(substrings[substringIndex], str + start, end - start + 1);
+            substrings[substringIndex][end - start + 1] = '\0'; // Null-terminate the substring
+
+            // Print debugging information
+            printf("Substring %d: \"%s\"\n", substringIndex+1, substrings[substringIndex]);
+
+            // Move start to the next non-space character after end
+            start = end + 1;
+            while (start < length && str[start] == ' ') {
+                start++;
+            }
+
+            substringIndex++; // Move to the next index in the substrings array
+        }
+        substrings[substringIndex] = NULL;
+    
+    } else {
+        substrings[0] = malloc((length + 1) * sizeof(char));
+        if (substrings[0] == NULL) {
+            fprintf(stderr, "Memory allocation failed for substring 0\n");
+            exit(1); // Exit the program with an error code
+        }
+        strncpy(substrings[0], str, length + 1);
+        substrings[0][length] = '\0'; // Null-terminate the substring
+        substrings[1] = NULL;
+    }
+    return substrings;
+
+}
+
+void renderText(SDL_Renderer* renderer, int x, int y, const char *str, TTF_Font* font) {
+
+    char **substrings = createSubstrings(str);
+
+    for (int i = 0; substrings[i] != NULL; i++) {
+
+        SDL_Color color = {0, 0, 0}; // Black color
+        SDL_Surface* textSurface = TTF_RenderText_Blended(font, substrings[i], color);
+        if (!textSurface) {
+            perror("Error rendering surface");
+        }
+
+        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_FreeSurface(textSurface); // Free the surface after creating the texture
+
+        // Get the dimensions of the rendered text
+        int textWidth, textHeight;
+        SDL_QueryTexture(textTexture, NULL, NULL, &textWidth, &textHeight);
+
+        // Create a destination rectangle for rendering the text texture scaling with substrings rendered
+        int scaledY = y + (textHeight * i);
+        SDL_Rect textRect = {x, scaledY, textWidth, textHeight};
+
+        // Render the text texture onto the screen
+        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+        SDL_DestroyTexture(textTexture);
+
+        // Free the memory allocated for each substring
+        free(substrings[i]);
+    }
+    free(substrings);
+    printf("String complete.\n");
 
 }
 
@@ -222,7 +277,7 @@ int main() {
 
     srand(time(NULL));
 
-    int randomTrackIndex = rand() % trackList.count;
+    int randomTrackIndex = 4;//rand() % trackList.count;
 
     // Allocate memory for entire path including ".mp3" and "/"
     char *trackPath = (char*)malloc((strlen(directory) + strlen(trackList.array[randomTrackIndex]) + 6) * sizeof(char));
@@ -239,12 +294,14 @@ int main() {
     // SDL_RenderFillRect(renderer, &buttonBotLeft);
     // SDL_RenderFillRect(renderer, &buttonBotRight);
 
-    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "WWWWWWWWWWWWW", font); // TopLeft
-    renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120, "WWWWWWWWWWWWWW", font); // TopRight
-    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Obama Was HereX", font); // BotLeft
-    renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 121 / 160, "Obama Was HereXX", font); // BotRight
+    printf("%s\n\n", trackList.array[randomTrackIndex]);
+    //renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "WWWWWWWWWW", font); // TopLeft
+    //renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120,trackList.array[randomTrackIndex], font); // TopRight
+    //renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Obama Was HereX", font); // BotLeft
+    renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 121 / 160, "Public Announcement Obama", font); // BotRight
     SDL_RenderPresent(renderer); // Update screen
 
+    freeLyricsStruct(trackList.array, trackList.count);
     while (!quit) {
         Uint32 frameStart = SDL_GetTicks();
 
