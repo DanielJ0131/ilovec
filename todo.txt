@@ -7,7 +7,6 @@ dice game
 
 
 
-
 lyrics guesser (S3RL game)
 =====================================================================================================================
 1. remove duplicate lines from same song (non-issue?)
@@ -18,4 +17,16 @@ lyrics guesser (S3RL game)
 6. add more artists, choose artist at start 
 (7. random "question" (Song goes like..., Which song is this, guess this song, do you know this one?) - use *strings[])
 8. multiplayer???
+=====================================================================================================================
+
+
+
+track guesser
+=====================================================================================================================
+1. "You did it!" sound effect if guessed correctly (Casual N00b)
+2.
+3.
+4.
+5.
+6. gameboy visual theme? 
 =====================================================================================================================
