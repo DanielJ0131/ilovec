@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_image.h>
@@ -203,13 +204,12 @@ void renderText(SDL_Renderer* renderer, int x, int y, const char *str, TTF_Font*
 
 }
 
-int* generateUniqueIndices(int trackAmount, int correctIndex, int *array) {
+int* generateUniqueIndices(int trackAmount, int correctIndex, int *array, int correctChoice) {
 
     int optionsAmount = 4;
     int i, j, isUnique;
 
     // Set correct answer
-    int correctChoice = rand() % optionsAmount;
     array[correctChoice] = correctIndex;
 
     // Choose unique indices
@@ -232,6 +232,36 @@ int* generateUniqueIndices(int trackAmount, int correctIndex, int *array) {
 
     return array;
 }
+
+void playMusic(Mix_Music *track) {
+
+    double duration = Mix_MusicDuration(track);
+
+    // Generate a random time point within the duration
+    printf("%lf\n", duration);
+    double randomTimePoint = ((double)rand() / (double)RAND_MAX) * duration;
+    printf("%lf\n", randomTimePoint);
+    
+    // Ensure snippet is at least 20s long
+    if (randomTimePoint > (duration - 20)) {
+        randomTimePoint = duration - 20;
+    }
+
+    // Play the music
+    Mix_PlayMusic(track, 0);
+
+    // Set the music position to the random time point
+    Mix_SetMusicPosition(randomTimePoint);
+
+}
+
+// void renderProgressBar(SDL_Renderer *renderer, int time) {
+// 
+//     SDL_Rect buttonTopRight = { WINDOW_WIDTH * 41/80, WINDOW_HEIGHT * 9/16, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 };
+// 
+//     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Set button color to green
+//     SDL_RenderFillRect(renderer, &progressBar);
+// }
 
 int main() {
     SDL_Window* window = NULL;
@@ -281,6 +311,7 @@ int main() {
     // Render background texture
     SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
+    SDL_Rect progressBarBackground = {WINDOW_WIDTH * 21/80, WINDOW_HEIGHT * 71/240, WINDOW_WIDTH * 161/325, WINDOW_HEIGHT * 5/48 };
     SDL_Rect buttonTopLeft = { WINDOW_WIDTH * 9/160, WINDOW_HEIGHT * 9/16, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 };
     SDL_Rect buttonTopRight = { WINDOW_WIDTH * 41/80, WINDOW_HEIGHT * 9/16, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 };
     SDL_Rect buttonBotLeft = { WINDOW_WIDTH * 3/80, WINDOW_HEIGHT * 35/48, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 };
@@ -290,7 +321,9 @@ int main() {
     const char *directory = "tracks"; // Set directory path
     LyricsStruct trackList = generateTrackList(directory);
 
-    srand(time(NULL));
+    int seed = time(NULL);
+    srand(seed);
+    printf("Seed: \"%d\"\n", seed);
 
     int randomTrackIndex = rand() % trackList.count;
 
@@ -314,8 +347,10 @@ int main() {
     //     printf("%d = %s\n", i, trackList.array[i]);
     // }
     int uniqueIndices[4];
-    generateUniqueIndices(trackList.count, randomTrackIndex, uniqueIndices);
+    int correctChoice = rand() % 4;
+    generateUniqueIndices(trackList.count, randomTrackIndex, uniqueIndices, correctChoice);
 
+    SDL_RenderFillRect(renderer, &progressBarBackground);
     renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[0]], font); // TopLeft
     renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[1]], font); // TopRight
     renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[2]], font); // BotLeft
@@ -323,6 +358,7 @@ int main() {
     SDL_RenderPresent(renderer); // Update screen
 
     freeLyricsStruct(trackList.array, trackList.count);
+    playMusic(track);
     while (!quit) {
         Uint32 frameStart = SDL_GetTicks();
 
@@ -356,27 +392,43 @@ int main() {
                     case SDLK_1:
                         clickCountTopLeft++;
                         printf("ButtonTopLeft clicked! Click count: %d\n", clickCountTopLeft);
+                        if (correctChoice == 0) {
+                            printf("Correct! Well done.\n");
+                        }
                         break;
                     case SDLK_2:
                         clickCountTopRight++;
                         printf("ButtonTopRight clicked! Resuming song. Click count: %d\n", clickCountTopRight);
-                        Mix_ResumeMusic();
+                        // Mix_ResumeMusic();
+                        if (correctChoice == 1) {
+                            printf("Correct! Well done.\n");
+                        }
                         break;
                     case SDLK_3:
                         clickCountBotLeft++;
                         printf("ButtonBotLeft clicked! Pausing song. Click count: %d\n", clickCountBotLeft);
-                        Mix_PauseMusic();
+                        // Mix_PauseMusic();
+                        if (correctChoice == 2) {
+                            printf("Correct! Well done.\n");
+                        }
                         break;
                     case SDLK_4:
                         clickCountBotRight++;
                         printf("ButtonBotRight clicked! Playing song. Click count: %d\n", clickCountBotRight);
-                        Mix_PlayMusic(track, -1);
+                        // Mix_PlayMusic(track, -1);
+                        if (correctChoice == 3) {
+                            printf("Correct! Well done.\n");
+                        }
                         break;
+                    case SDLK_5:
+                    quit = true;
                 }
             }
         }
         // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Clear screen
         // SDL_RenderClear(renderer);
+
+        // renderProgressBar();
 
         // Calculate the time taken for rendering this frame
         Uint32 frameTime = SDL_GetTicks() - frameStart;
