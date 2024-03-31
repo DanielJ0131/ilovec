@@ -203,6 +203,36 @@ void renderText(SDL_Renderer* renderer, int x, int y, const char *str, TTF_Font*
 
 }
 
+int* generateUniqueIndices(int trackAmount, int correctIndex, int *array) {
+
+    int optionsAmount = 4;
+    int i, j, isUnique;
+
+    // Set correct answer
+    int correctChoice = rand() % optionsAmount;
+    array[correctChoice] = correctIndex;
+
+    // Choose unique indices
+    for (i = 0; i < (optionsAmount); i++) {
+        if (i == correctChoice) continue;
+
+        do {
+           array[i] = rand() % trackAmount;
+           isUnique = 1; // Assume number is unique
+
+           // Check if number is unique
+           for (j = 0; j < i; j++) {
+                if (array[i] == array[j] || array[i] == correctIndex) {
+                    isUnique = 0;
+                    break;
+                }
+           }
+        } while (!isUnique); // Repeat if number is not unique
+    }
+
+    return array;
+}
+
 int main() {
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
@@ -256,28 +286,13 @@ int main() {
     SDL_Rect buttonBotLeft = { WINDOW_WIDTH * 3/80, WINDOW_HEIGHT * 35/48, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 };
     SDL_Rect buttonBotRight = { WINDOW_WIDTH * 1/2, WINDOW_HEIGHT * 35/48, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 };
 
-    // int buttonPositions[4][4] = {
-    // {WINDOW_WIDTH / 2 - 250, WINDOW_HEIGHT / 2 - 75, textWidth + 32, textHeight + 32},   // Button 1
-    // {WINDOW_WIDTH / 2 + 25, WINDOW_HEIGHT / 2 - 75, 100, 50},  // Button 2
-    // {WINDOW_WIDTH / 2 - 125, WINDOW_HEIGHT / 2 + 25, 100, 50},   // Button 3
-    // {WINDOW_WIDTH / 2 + 25, WINDOW_HEIGHT / 2 + 25, 100, 50}   // Button 4
-    // };
-
-    // SDL_Rect buttonRects[4];
-    // for (int i = 0; i < 4; ++i) {
-    // buttonRects[i].x = buttonPositions[i][0];
-    // buttonRects[i].y = buttonPositions[i][1];
-    // buttonRects[i].w = buttonPositions[i][2];
-    // buttonRects[i].h = buttonPositions[i][3];
-    // }
-
     // Define the paths to the lyrics
     const char *directory = "tracks"; // Set directory path
     LyricsStruct trackList = generateTrackList(directory);
 
     srand(time(NULL));
 
-    int randomTrackIndex = 0;//rand() % trackList.count;
+    int randomTrackIndex = rand() % trackList.count;
 
     // Allocate memory for entire path including ".mp3" and "/"
     char *trackPath = (char*)malloc((strlen(directory) + strlen(trackList.array[randomTrackIndex]) + 6) * sizeof(char));
@@ -294,14 +309,17 @@ int main() {
     // SDL_RenderFillRect(renderer, &buttonBotLeft);
     // SDL_RenderFillRect(renderer, &buttonBotRight);
 
-    for (int i = 0; i < trackList.count; i++) {
-        printf("%d = %s\n", i, trackList.array[i]);
-    }
+    // Print indices for tracks (debug)
+    // for (int i = 0; i < trackList.count; i++) {
+    //     printf("%d = %s\n", i, trackList.array[i]);
+    // }
+    int uniqueIndices[4];
+    generateUniqueIndices(trackList.count, randomTrackIndex, uniqueIndices);
 
-    //renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "WWWWWWWWWW", font); // TopLeft
-    renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120,trackList.array[randomTrackIndex], font); // TopRight
-    //renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Obama Was HereX", font); // BotLeft
-    renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 121 / 160, "Public Announcement Obama", font); // BotRight
+    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[0]], font); // TopLeft
+    renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[1]], font); // TopRight
+    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[2]], font); // BotLeft
+    renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[3]], font); // BotRight
     SDL_RenderPresent(renderer); // Update screen
 
     freeLyricsStruct(trackList.array, trackList.count);

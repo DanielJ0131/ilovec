@@ -1,3 +1,8 @@
+# Required libraries for tg.c:
+SDL2, SDL2_mixer, SDL2_ttf, SDL2_image
+
+Back to the poem...
+
 # The Beauty of C
 
 In the realm of programming, a language stands tall,
