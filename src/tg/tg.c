@@ -277,7 +277,7 @@ int main() {
 
     srand(time(NULL));
 
-    int randomTrackIndex = 4;//rand() % trackList.count;
+    int randomTrackIndex = 0;//rand() % trackList.count;
 
     // Allocate memory for entire path including ".mp3" and "/"
     char *trackPath = (char*)malloc((strlen(directory) + strlen(trackList.array[randomTrackIndex]) + 6) * sizeof(char));
@@ -294,9 +294,12 @@ int main() {
     // SDL_RenderFillRect(renderer, &buttonBotLeft);
     // SDL_RenderFillRect(renderer, &buttonBotRight);
 
-    printf("%s\n\n", trackList.array[randomTrackIndex]);
+    for (int i = 0; i < trackList.count; i++) {
+        printf("%d = %s\n", i, trackList.array[i]);
+    }
+
     //renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "WWWWWWWWWW", font); // TopLeft
-    //renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120,trackList.array[randomTrackIndex], font); // TopRight
+    renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120,trackList.array[randomTrackIndex], font); // TopRight
     //renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Obama Was HereX", font); // BotLeft
     renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 121 / 160, "Public Announcement Obama", font); // BotRight
     SDL_RenderPresent(renderer); // Update screen
@@ -365,6 +368,7 @@ int main() {
             SDL_Delay(16 - frameTime);
         }
     }
+    free(trackPath);
 
     SDL_DestroyTexture(backgroundTexture);
     IMG_Quit();
