@@ -24,11 +24,10 @@ lyrics guesser (S3RL game)
 track guesser
 =====================================================================================================================
 1. "You did it!" sound effect if guessed correctly (Casual N00b)
-2.  Makefile for:
-    gcc tg.c -l SDL2 -l SDL2_mixer -l SDL2_ttf -l SDL2_image -o abc.out && ./abc.out
-3. Start track at random timestamp
+2. "Click Bait" is almost entirely quiet if randomTimePoint > duration-20 
+3. "Space Invader" is extremely loud
 4. Speaker animation, question on display
 5. Actual game logic :P
 6. gameboy visual theme? 
-7. "Speechless", "Not Alone" is extremely quiet
+7. "Speechless", "Not Alone", "Dealer", "Pretty Rave Girl 2010", "Raver Raver Raver" is extremely quiet
 =====================================================================================================================

@@ -6,7 +6,6 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <math.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_image.h>
@@ -16,6 +15,70 @@
 const int WINDOW_WIDTH = 640;
 const int WINDOW_HEIGHT = 480;
 const char* WINDOW_TITLE = "TrackGuesser";
+
+bool isInsideButton(int x, int y, SDL_Rect button) {
+    return (x >= button.x && x <= button.x + button.w &&
+            y >= button.y && y <= button.y + button.h);
+}
+
+int menu(SDL_Event event, bool quit, SDL_Rect buttons[4]) {
+
+    while (!quit) {
+        Uint32 frameStart = SDL_GetTicks();
+
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                quit = true;
+            } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+                if (isInsideButton(x, y, buttons[0])) {
+                    return 0;
+                }
+                if (isInsideButton(x, y, buttons[1])) {
+                    quit = true;
+                    return 1;
+                }
+                if (isInsideButton(x, y, buttons[2])) {
+                    quit = true;
+                    return 1;
+                }
+                if (isInsideButton(x, y, buttons[3])) {
+                }
+            } else if (event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym) {
+                    case SDLK_1:
+                        return 0;
+                        break;
+                    case SDLK_2:
+                        quit = true;
+                        return 1;
+                        break;
+                    case SDLK_3:
+                        quit = true;
+                        return 1;
+                        break;
+                    case SDLK_4:
+                        break;
+                    case SDLK_5:
+                        quit = true;
+                        return 1;
+                        break;
+                }
+            }
+        }
+
+        // Calculate the time taken for rendering this frame
+        Uint32 frameTime = SDL_GetTicks() - frameStart;
+
+        // Delay to control the frame rate
+        if (frameTime < 16) {
+            SDL_Delay(16 - frameTime);
+        }
+    }
+    return 1;
+
+}
 
 // Taken from lg.c
 // Structure to hold both array and number of elements
@@ -91,11 +154,6 @@ void freeLyricsStruct(char **array, int count) {
         free(array[i]);
     }
     free(array);
-}
-
-bool isInsideButton(int x, int y, SDL_Rect button) {
-    return (x >= button.x && x <= button.x + button.w &&
-            y >= button.y && y <= button.y + button.h);
 }
 
 char** createSubstrings(const char *str) {
@@ -311,134 +369,163 @@ int main() {
     // Render background texture
     SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
-    SDL_Rect progressBarBackground = {WINDOW_WIDTH * 21/80, WINDOW_HEIGHT * 71/240, WINDOW_WIDTH * 161/325, WINDOW_HEIGHT * 5/48 };
-    SDL_Rect buttonTopLeft = { WINDOW_WIDTH * 9/160, WINDOW_HEIGHT * 9/16, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 };
-    SDL_Rect buttonTopRight = { WINDOW_WIDTH * 41/80, WINDOW_HEIGHT * 9/16, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 };
-    SDL_Rect buttonBotLeft = { WINDOW_WIDTH * 3/80, WINDOW_HEIGHT * 35/48, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 };
-    SDL_Rect buttonBotRight = { WINDOW_WIDTH * 1/2, WINDOW_HEIGHT * 35/48, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 };
+    SDL_Rect progressBarBackground = { WINDOW_WIDTH * 21/80, WINDOW_HEIGHT * 71/240, WINDOW_WIDTH * 161/325, WINDOW_HEIGHT * 5/48 };
+    
+    // TopLeft, TopRight, BotLeft, BotRight
+    SDL_Rect buttons[4] = {
+        { WINDOW_WIDTH * 9/160, WINDOW_HEIGHT * 9/16, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 },
+        { WINDOW_WIDTH * 41/80, WINDOW_HEIGHT * 9/16, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 },
+        { WINDOW_WIDTH * 3/80, WINDOW_HEIGHT * 35/48, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 },
+        { WINDOW_WIDTH * 1/2, WINDOW_HEIGHT * 35/48, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 }
+    };
 
-    // Define the paths to the lyrics
-    const char *directory = "tracks"; // Set directory path
-    LyricsStruct trackList = generateTrackList(directory);
+    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "Play", font); // TopLeft
+    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Quit", font); // BotLeft
+    SDL_RenderPresent(renderer); // Update screen
 
     int seed = time(NULL);
     srand(seed);
     printf("Seed: \"%d\"\n", seed);
 
-    int randomTrackIndex = rand() % trackList.count;
+    while (menu(event, quit, buttons) == 0 ) {
 
-    // Allocate memory for entire path including ".mp3" and "/"
-    char *trackPath = (char*)malloc((strlen(directory) + strlen(trackList.array[randomTrackIndex]) + 6) * sizeof(char));
+        // Draw over text by rendering backgroundTexture again
+        SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
+        SDL_RenderPresent(renderer);
 
-    // Prefix directory path to chosen .mp3 file
-    sprintf(trackPath, "%s/%s.mp3", directory, trackList.array[randomTrackIndex]);
+        // Define the paths to the lyrics
+        const char *directory = "tracks"; // Set directory path
+        LyricsStruct trackList = generateTrackList(directory);
 
-    Mix_Music* track = Mix_LoadMUS(trackPath);
+        int randomTrackIndex = rand() % trackList.count;
 
-    // Draw button hitboxes (debug)
-    // SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Set button color to green
-    // SDL_RenderFillRect(renderer, &buttonTopLeft);
-    // SDL_RenderFillRect(renderer, &buttonTopRight);
-    // SDL_RenderFillRect(renderer, &buttonBotLeft);
-    // SDL_RenderFillRect(renderer, &buttonBotRight);
+        // Allocate memory for entire path including ".mp3" and "/"
+        char *trackPath = (char*)malloc((strlen(directory) + strlen(trackList.array[randomTrackIndex]) + 6) * sizeof(char));
 
-    // Print indices for tracks (debug)
-    // for (int i = 0; i < trackList.count; i++) {
-    //     printf("%d = %s\n", i, trackList.array[i]);
-    // }
-    int uniqueIndices[4];
-    int correctChoice = rand() % 4;
-    generateUniqueIndices(trackList.count, randomTrackIndex, uniqueIndices, correctChoice);
+        // Prefix directory path to chosen .mp3 file
+        sprintf(trackPath, "%s/%s.mp3", directory, trackList.array[randomTrackIndex]);
 
-    SDL_RenderFillRect(renderer, &progressBarBackground);
-    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[0]], font); // TopLeft
-    renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[1]], font); // TopRight
-    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[2]], font); // BotLeft
-    renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[3]], font); // BotRight
-    SDL_RenderPresent(renderer); // Update screen
+        Mix_Music* track = Mix_LoadMUS(trackPath);
 
-    freeLyricsStruct(trackList.array, trackList.count);
-    playMusic(track);
-    while (!quit) {
-        Uint32 frameStart = SDL_GetTicks();
+        // Draw button hitboxes (debug)
+        // SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Set button color to green
+        // SDL_RenderFillRect(renderer, &buttonTopLeft);
+        // SDL_RenderFillRect(renderer, &buttonTopRight);
+        // SDL_RenderFillRect(renderer, &buttonBotLeft);
+        // SDL_RenderFillRect(renderer, &buttonBotRight);
 
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                quit = true;
-            } else if (event.type == SDL_MOUSEBUTTONDOWN) {
-                int x, y;
-                SDL_GetMouseState(&x, &y);
-                if (isInsideButton(x, y, buttonTopLeft)) {
-                    clickCountTopLeft++;
-                    printf("ButtonTopLeft clicked! Click count: %d\n", clickCountTopLeft);
-                }
-                if (isInsideButton(x, y, buttonTopRight)) {
-                    clickCountTopRight++;
-                    printf("ButtonTopRight clicked! Resuming song. Click count: %d\n", clickCountTopRight);
-                    Mix_ResumeMusic();
-                }
-                if (isInsideButton(x, y, buttonBotLeft)) {
-                    clickCountBotLeft++;
-                    printf("ButtonBotLeft clicked! Pausing song. Click count: %d\n", clickCountBotLeft);
-                    Mix_PauseMusic();
-                }
-                if (isInsideButton(x, y, buttonBotRight)) {
-                    clickCountBotRight++;
-                    printf("ButtonBotRight clicked! Playing song. Click count: %d\n", clickCountBotRight);
-                    Mix_PlayMusic(track, -1);
-                }
-            } else if (event.type == SDL_KEYDOWN) {
-                switch (event.key.keysym.sym) {
-                    case SDLK_1:
+        // Print indices for tracks (debug)
+        // for (int i = 0; i < trackList.count; i++) {
+        //     printf("%d = %s\n", i, trackList.array[i]);
+        // }
+        int uniqueIndices[4];
+        int correctChoice = rand() % 4;
+        generateUniqueIndices(trackList.count, randomTrackIndex, uniqueIndices, correctChoice);
+
+        SDL_RenderFillRect(renderer, &progressBarBackground);
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[0]], font); // TopLeft
+        renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[1]], font); // TopRight
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[2]], font); // BotLeft
+        renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[3]], font); // BotRight
+        SDL_RenderPresent(renderer); // Update screen
+
+        freeLyricsStruct(trackList.array, trackList.count);
+        playMusic(track);
+        while (!quit) {
+            Uint32 frameStart = SDL_GetTicks();
+
+            while (SDL_PollEvent(&event)) {
+                if (event.type == SDL_QUIT) {
+                    quit = true;
+                } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+                    if (isInsideButton(x, y, buttons[0])) {
                         clickCountTopLeft++;
                         printf("ButtonTopLeft clicked! Click count: %d\n", clickCountTopLeft);
-                        if (correctChoice == 0) {
-                            printf("Correct! Well done.\n");
-                        }
-                        break;
-                    case SDLK_2:
+                        printf("Note: To quit, press 5.\n");
+                    }
+                    if (isInsideButton(x, y, buttons[1])) {
                         clickCountTopRight++;
                         printf("ButtonTopRight clicked! Resuming song. Click count: %d\n", clickCountTopRight);
-                        // Mix_ResumeMusic();
-                        if (correctChoice == 1) {
-                            printf("Correct! Well done.\n");
-                        }
-                        break;
-                    case SDLK_3:
+                        printf("Note: To quit, press 5.\n");
+                    }
+                    if (isInsideButton(x, y, buttons[2])) {
                         clickCountBotLeft++;
                         printf("ButtonBotLeft clicked! Pausing song. Click count: %d\n", clickCountBotLeft);
-                        // Mix_PauseMusic();
-                        if (correctChoice == 2) {
-                            printf("Correct! Well done.\n");
-                        }
-                        break;
-                    case SDLK_4:
+                        printf("Note: To quit, press 5.\n");
+                    }
+                    if (isInsideButton(x, y, buttons[3])) {
                         clickCountBotRight++;
                         printf("ButtonBotRight clicked! Playing song. Click count: %d\n", clickCountBotRight);
-                        // Mix_PlayMusic(track, -1);
-                        if (correctChoice == 3) {
-                            printf("Correct! Well done.\n");
-                        }
-                        break;
-                    case SDLK_5:
-                    quit = true;
+                        printf("Note: To quit, press 5.\n");
+                    }
+                } else if (event.type == SDL_KEYDOWN) {
+                    switch (event.key.keysym.sym) {
+                        case SDLK_1:
+                            clickCountTopLeft++;
+                            printf("ButtonTopLeft clicked! Click count: %d\n", clickCountTopLeft);
+                            if (correctChoice == 0) {
+                                printf("Correct! Well done.\n");
+                            }
+                            printf("Note: To quit, press 5.\n");
+                            break;
+                        case SDLK_2:
+                            clickCountTopRight++;
+                            printf("ButtonTopRight clicked! Resuming song. Click count: %d\n", clickCountTopRight);
+                            // Mix_ResumeMusic();
+                            if (correctChoice == 1) {
+                                printf("Correct! Well done.\n");
+                            }
+                            printf("Note: To quit, press 5.\n");
+                            break;
+                        case SDLK_3:
+                            clickCountBotLeft++;
+                            printf("ButtonBotLeft clicked! Pausing song. Click count: %d\n", clickCountBotLeft);
+                            // Mix_PauseMusic();
+                            if (correctChoice == 2) {
+                                printf("Correct! Well done.\n");
+                            }
+                            printf("Note: To quit, press 5.\n");
+                            break;
+                        case SDLK_4:
+                            clickCountBotRight++;
+                            printf("ButtonBotRight clicked! Playing song. Click count: %d\n", clickCountBotRight);
+                            // Mix_PlayMusic(track, -1);
+                            if (correctChoice == 3) {
+                                printf("Correct! Well done.\n");
+                            }
+                            printf("Note: To quit, press 5.\n");
+                            break;
+                        case SDLK_5:
+                        quit = true;
+                    }
                 }
             }
+            // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Clear screen
+            // SDL_RenderClear(renderer);
+
+            // renderProgressBar();
+
+            // Calculate the time taken for rendering this frame
+            Uint32 frameTime = SDL_GetTicks() - frameStart;
+
+            // Delay to control the frame rate
+            if (frameTime < 16) { // Targeting 60 FPS (1000ms / 60 = 16.666ms)
+                SDL_Delay(16 - frameTime);
+            }
         }
-        // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Clear screen
-        // SDL_RenderClear(renderer);
+        free(trackPath);
+        Mix_FreeMusic(track);
+        quit = false;
 
-        // renderProgressBar();
-
-        // Calculate the time taken for rendering this frame
-        Uint32 frameTime = SDL_GetTicks() - frameStart;
-
-        // Delay to control the frame rate
-        if (frameTime < 16) { // Targeting 60 FPS (1000ms / 60 = 16.666ms)
-            SDL_Delay(16 - frameTime);
-        }
+        SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "Play", font);
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Quit", font);
+        SDL_RenderPresent(renderer);
     }
-    free(trackPath);
+
+    printf("Thanks for playing! Obama was here 2024\n");
 
     SDL_DestroyTexture(backgroundTexture);
     IMG_Quit();
@@ -447,7 +534,6 @@ int main() {
     TTF_CloseFont(font);
     TTF_Quit();
 
-    Mix_FreeMusic(track);
     Mix_CloseAudio();
     Mix_Quit();
 
