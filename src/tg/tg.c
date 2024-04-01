@@ -156,11 +156,11 @@ void freeLyricsStruct(char **array, int count) {
     free(array);
 }
 
-char** createSubstrings(const char *str) {
+char** createSubstrings(const char *str, int maxLength) {
 
     int length = strlen(str);
-    int numSubstrings = length / 15; // Integer division to calculate the number of full substrings
-    if (length % 15 != 0) {
+    int numSubstrings = length / maxLength; // Integer division to calculate the number of full substrings
+    if (length % maxLength != 0) {
         numSubstrings++; // Increment the number of substrings if there's a remainder
     }
     char **substrings = malloc((numSubstrings + 2) * sizeof(char*));
@@ -177,7 +177,7 @@ char** createSubstrings(const char *str) {
 
         while (start < length) {
             // Move end to last possible character or end of string, whichever comes first
-            end = start + 14;
+            end = start + maxLength - 1;
             if (end >= length - 1) {
                 end = length - 1;
             } else {
@@ -227,9 +227,9 @@ char** createSubstrings(const char *str) {
 
 }
 
-void renderText(SDL_Renderer* renderer, int x, int y, const char *str, TTF_Font* font) {
+void renderText(SDL_Renderer* renderer, int x, int y, const char *str, TTF_Font* font, int maxLength) {
 
-    char **substrings = createSubstrings(str);
+    char **substrings = createSubstrings(str, maxLength);
 
     for (int i = 0; substrings[i] != NULL; i++) {
 
@@ -269,22 +269,29 @@ int* generateUniqueIndices(int trackAmount, int correctIndex, int *array, int co
 
     // Set correct answer
     array[correctChoice] = correctIndex;
+    printf("correctindex = %d\n", correctIndex);
 
     // Choose unique indices
     for (i = 0; i < (optionsAmount); i++) {
         if (i == correctChoice) continue;
 
         do {
-           array[i] = rand() % trackAmount;
-           isUnique = 1; // Assume number is unique
+            array[i] = rand() % trackAmount;
+            isUnique = 1; // Assume number is unique
 
-           // Check if number is unique
-           for (j = 0; j < i; j++) {
-                if (array[i] == array[j] || array[i] == correctIndex) {
-                    isUnique = 0;
-                    break;
+            if (array[i] == correctIndex) {
+                isUnique = 0;
+
+            } else {
+                // Check if number is unique
+                for (j = 0; j < i; j++) {
+                    if (array[i] == array[j]) {
+                        isUnique = 0;
+                        break;
+                    }
                 }
-           }
+            }
+
         } while (!isUnique); // Repeat if number is not unique
     }
 
@@ -327,7 +334,10 @@ int main() {
     SDL_Texture* backgroundTexture = NULL;
     SDL_Surface* backgroundSurface = NULL;
     SDL_Event event;
+    bool wrong = false;
     bool quit = false;
+    bool quitProgram = false;
+    bool correct = false;
     int clickCountTopLeft = 0;
     int clickCountTopRight = 0;
     int clickCountBotLeft = 0;
@@ -379,23 +389,23 @@ int main() {
         { WINDOW_WIDTH * 1/2, WINDOW_HEIGHT * 35/48, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 }
     };
 
-    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "Play", font); // TopLeft
-    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Quit", font); // BotLeft
+    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "Play", font, 15); // TopLeft
+    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Quit", font, 15); // BotLeft
     SDL_RenderPresent(renderer); // Update screen
 
     int seed = time(NULL);
     srand(seed);
     printf("Seed: \"%d\"\n", seed);
 
+    // Define the paths to the lyrics
+    const char *directory = "tracks"; // Set directory path
+    LyricsStruct trackList = generateTrackList(directory);
+
     while (menu(event, quit, buttons) == 0 ) {
 
         // Draw over text by rendering backgroundTexture again
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
         SDL_RenderPresent(renderer);
-
-        // Define the paths to the lyrics
-        const char *directory = "tracks"; // Set directory path
-        LyricsStruct trackList = generateTrackList(directory);
 
         int randomTrackIndex = rand() % trackList.count;
 
@@ -422,20 +432,26 @@ int main() {
         int correctChoice = rand() % 4;
         generateUniqueIndices(trackList.count, randomTrackIndex, uniqueIndices, correctChoice);
 
+        printf("correctChoice = %d\n", correctChoice);
+        for (int i = 0; i < 4; i++) {
+            printf("uniqueIndices[%d] = %d\n", i, uniqueIndices[i]);
+        }
+
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Clear screen
         SDL_RenderFillRect(renderer, &progressBarBackground);
-        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[0]], font); // TopLeft
-        renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[1]], font); // TopRight
-        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[2]], font); // BotLeft
-        renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[3]], font); // BotRight
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[0]], font, 15); // TopLeft
+        renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[1]], font, 15); // TopRight
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[2]], font, 15); // BotLeft
+        renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[3]], font, 15); // BotRight
         SDL_RenderPresent(renderer); // Update screen
 
-        freeLyricsStruct(trackList.array, trackList.count);
         playMusic(track);
         while (!quit) {
             Uint32 frameStart = SDL_GetTicks();
 
             while (SDL_PollEvent(&event)) {
                 if (event.type == SDL_QUIT) {
+                    quitProgram = true;
                     quit = true;
                 } else if (event.type == SDL_MOUSEBUTTONDOWN) {
                     int x, y;
@@ -443,21 +459,49 @@ int main() {
                     if (isInsideButton(x, y, buttons[0])) {
                         clickCountTopLeft++;
                         printf("ButtonTopLeft clicked! Click count: %d\n", clickCountTopLeft);
+                            if (correctChoice == 0) {
+                                printf("Correct! Well done.\n");
+                                correct = true;
+                            } else {
+                                wrong = true;
+                            }
+
                         printf("Note: To quit, press 5.\n");
                     }
                     if (isInsideButton(x, y, buttons[1])) {
                         clickCountTopRight++;
                         printf("ButtonTopRight clicked! Resuming song. Click count: %d\n", clickCountTopRight);
+                            if (correctChoice == 1) {
+                                printf("Correct! Well done.\n");
+                                correct = true;
+                            } else {
+                                wrong = true;
+                            }
+
                         printf("Note: To quit, press 5.\n");
                     }
                     if (isInsideButton(x, y, buttons[2])) {
                         clickCountBotLeft++;
                         printf("ButtonBotLeft clicked! Pausing song. Click count: %d\n", clickCountBotLeft);
+                            if (correctChoice == 2) {
+                                printf("Correct! Well done.\n");
+                                correct = true;
+                            } else {
+                                wrong = true;
+                            }
+
                         printf("Note: To quit, press 5.\n");
                     }
                     if (isInsideButton(x, y, buttons[3])) {
                         clickCountBotRight++;
                         printf("ButtonBotRight clicked! Playing song. Click count: %d\n", clickCountBotRight);
+                            if (correctChoice == 3) {
+                                printf("Correct! Well done.\n");
+                                correct = true;
+                            } else {
+                                wrong = true;
+                            }
+
                         printf("Note: To quit, press 5.\n");
                     }
                 } else if (event.type == SDL_KEYDOWN) {
@@ -467,7 +511,11 @@ int main() {
                             printf("ButtonTopLeft clicked! Click count: %d\n", clickCountTopLeft);
                             if (correctChoice == 0) {
                                 printf("Correct! Well done.\n");
+                                correct = true;
+                            } else {
+                                wrong = true;
                             }
+
                             printf("Note: To quit, press 5.\n");
                             break;
                         case SDLK_2:
@@ -476,7 +524,11 @@ int main() {
                             // Mix_ResumeMusic();
                             if (correctChoice == 1) {
                                 printf("Correct! Well done.\n");
+                                correct = true;
+                            } else {
+                                wrong = true;
                             }
+
                             printf("Note: To quit, press 5.\n");
                             break;
                         case SDLK_3:
@@ -485,7 +537,11 @@ int main() {
                             // Mix_PauseMusic();
                             if (correctChoice == 2) {
                                 printf("Correct! Well done.\n");
+                                correct = true;
+                            } else {
+                                wrong = true;
                             }
+
                             printf("Note: To quit, press 5.\n");
                             break;
                         case SDLK_4:
@@ -494,13 +550,29 @@ int main() {
                             // Mix_PlayMusic(track, -1);
                             if (correctChoice == 3) {
                                 printf("Correct! Well done.\n");
+                                correct = true;
+                            } else {
+                                wrong = true;
                             }
+
                             printf("Note: To quit, press 5.\n");
                             break;
                         case SDLK_5:
                         quit = true;
                     }
                 }
+                if (correct == true) {
+                    SDL_RenderFillRect(renderer, &progressBarBackground);
+                    renderText(renderer, progressBarBackground.x, progressBarBackground.y, "Correct! Well done! Press 5 to return to menu.", font, 26);
+                    correct = false;
+                    SDL_RenderPresent(renderer);
+                } else if (wrong == true) {
+                    renderText(renderer, progressBarBackground.x, progressBarBackground.y, "Wrong. Try again.", font, 26);
+                    wrong = false;
+                    SDL_RenderPresent(renderer);
+                }
+
+
             }
             // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Clear screen
             // SDL_RenderClear(renderer);
@@ -515,17 +587,24 @@ int main() {
                 SDL_Delay(16 - frameTime);
             }
         }
+
         free(trackPath);
         Mix_FreeMusic(track);
         quit = false;
+        
+        if (quitProgram == true) {
+            break;
+        }
 
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "Play", font);
-        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Quit", font);
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "Play", font, 15);
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Quit", font, 15);
         SDL_RenderPresent(renderer);
     }
 
     printf("Thanks for playing! Obama was here 2024\n");
+
+    freeLyricsStruct(trackList.array, trackList.count);
 
     SDL_DestroyTexture(backgroundTexture);
     IMG_Quit();
