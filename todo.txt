@@ -29,5 +29,5 @@ track guesser
 4. Speaker animation, question on display
 5. Actual game logic :P
 6. gameboy visual theme? 
-7. "Speechless", "Not Alone", "Dealer", "Pretty Rave Girl 2010", "Raver Raver Raver", "Heart Thief", "My Girlfriend is a Raver", "Take Me" are extremely quiet
+7. "Speechless", "Not Alone", "Dealer", "Pretty Rave Girl 2010", "Raver Raver Raver", "Heart Thief", "FTW", "My Girlfriend is a Raver", "Take Me" are extremely quiet
 =====================================================================================================================

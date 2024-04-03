@@ -355,9 +355,9 @@ int main() {
         perror("Error initializing SDL_ttf");
     }
 
-    TTF_Font* font = TTF_OpenFont("fonts/PublicPixel-z84yD.ttf", 12);
-    if (!font) {
-        perror("Error loading font");
+    TTF_Font* optionFont = TTF_OpenFont("fonts/PublicPixel-z84yD.ttf", 12);
+    if (!optionFont) {
+        perror("Error loading optionFont");
     }
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -366,7 +366,7 @@ int main() {
     window = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    backgroundSurface = IMG_Load("img/backgroundv2.jpg");
+    backgroundSurface = IMG_Load("img/backgroundv3.jpg");
     if (!backgroundSurface) {
         printf("Error loading background image: %s\n", IMG_GetError());
         return 1;
@@ -389,8 +389,8 @@ int main() {
         { WINDOW_WIDTH * 1/2, WINDOW_HEIGHT * 35/48, WINDOW_WIDTH * 71/160, WINDOW_HEIGHT * 11/80 }
     };
 
-    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "Play", font, 15); // TopLeft
-    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Quit", font, 15); // BotLeft
+    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "Play", optionFont, 15); // TopLeft
+    renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Quit", optionFont, 15); // BotLeft
     SDL_RenderPresent(renderer); // Update screen
 
     int seed = time(NULL);
@@ -437,12 +437,12 @@ int main() {
             printf("uniqueIndices[%d] = %d\n", i, uniqueIndices[i]);
         }
 
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Clear screen
+        SDL_SetRenderDrawColor(renderer, 92, 117, 0, 255);
         SDL_RenderFillRect(renderer, &progressBarBackground);
-        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[0]], font, 15); // TopLeft
-        renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[1]], font, 15); // TopRight
-        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[2]], font, 15); // BotLeft
-        renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[3]], font, 15); // BotRight
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[0]], optionFont, 15); // TopLeft
+        renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 71 / 120, trackList.array[uniqueIndices[1]], optionFont, 15); // TopRight
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[2]], optionFont, 15); // BotLeft
+        renderText(renderer, WINDOW_WIDTH * 41 / 64, WINDOW_HEIGHT * 121 / 160, trackList.array[uniqueIndices[3]], optionFont, 15); // BotRight
         SDL_RenderPresent(renderer); // Update screen
 
         playMusic(track);
@@ -558,16 +558,20 @@ int main() {
                             printf("Note: To quit, press 5.\n");
                             break;
                         case SDLK_5:
-                        quit = true;
+                            quit = true;
+                            break;
+                        case SDLK_6:
+                            Mix_PlayMusic(track, -1);
+                            break;
                     }
                 }
                 if (correct == true) {
                     SDL_RenderFillRect(renderer, &progressBarBackground);
-                    renderText(renderer, progressBarBackground.x, progressBarBackground.y, "Correct! Well done! Press 5 to return to menu.", font, 26);
+                    renderText(renderer, progressBarBackground.x, progressBarBackground.y, "Correct! Well done! Press 5 to return to menu.", optionFont, 26);
                     correct = false;
                     SDL_RenderPresent(renderer);
                 } else if (wrong == true) {
-                    renderText(renderer, progressBarBackground.x, progressBarBackground.y, "Wrong. Try again.", font, 26);
+                    renderText(renderer, progressBarBackground.x, progressBarBackground.y, "Wrong. Try again.", optionFont, 26);
                     wrong = false;
                     SDL_RenderPresent(renderer);
                 }
@@ -597,8 +601,8 @@ int main() {
         }
 
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "Play", font, 15);
-        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Quit", font, 15);
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 71 / 120, "Play", optionFont, 15);
+        renderText(renderer, WINDOW_WIDTH * 3 / 16, WINDOW_HEIGHT * 121 / 160, "Quit", optionFont, 15);
         SDL_RenderPresent(renderer);
     }
 
@@ -610,7 +614,7 @@ int main() {
     IMG_Quit();
     SDL_Quit();
 
-    TTF_CloseFont(font);
+    TTF_CloseFont(optionFont);
     TTF_Quit();
 
     Mix_CloseAudio();
