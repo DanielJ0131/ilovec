@@ -24,10 +24,11 @@ lyrics guesser (S3RL game)
 track guesser
 =====================================================================================================================
 1. "You did it!" sound effect if guessed correctly (Casual N00b)
-2. "Click Bait" is almost entirely quiet if randomTimePoint > duration-20 
+2. "Back To You", "Click Bait" is almost entirely quiet if randomTimePoint > duration-20 
 3. "Space Invader" is extremely loud
 4. Speaker animation, question on display
 5. Actual game logic :P
 6. gameboy visual theme? 
 7. "Speechless", "Not Alone", "Dealer", "Pretty Rave Girl 2010", "Raver Raver Raver", "Heart Thief", "FTW", "My Girlfriend is a Raver", "Take Me" are extremely quiet
+8. Modes (1 second snippet master mode)
 =====================================================================================================================
