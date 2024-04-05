@@ -307,9 +307,9 @@ void playMusic(Mix_Music *track) {
     double randomTimePoint = ((double)rand() / (double)RAND_MAX) * duration;
     printf("%lf\n", randomTimePoint);
     
-    // Ensure snippet is at least 20s long
-    if (randomTimePoint > (duration - 20)) {
-        randomTimePoint = duration - 20;
+    // Ensure snippet is at least 50s long
+    if (randomTimePoint > (duration - 50)) {
+        randomTimePoint = duration - 50;
     }
 
     // Play the music
