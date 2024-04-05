@@ -254,12 +254,13 @@ int setDifficulty() {
     return 0;
 }
 
-int hints() {
+int hints(const char *songName) {
     clearScreen();
     printf("Hints available:\n");
     printf("1. See next line of lyrics\n");
     printf("2. Show release date\n");
-    printf("3. Cancel\n");
+    printf("3. Give up (show song title)\n");
+    printf("4. Cancel\n");
     char choice;
     printf("Enter your choice: ");
     scanf(" %c", &choice);
@@ -276,12 +277,17 @@ int hints() {
         case '3':
             clearInputBuffer();
             clearScreen();
+            printf("%s\n", songName);
+            return 0;
+        case '4':
+            clearInputBuffer();
+            clearScreen();
             return 0;
         default:
             printf("Invalid choice. Please try again.\n");
             sleep(2);
             clearInputBuffer();
-            hints();
+            hints(songName);
             return 0;
     }
     return 0;
@@ -446,7 +452,7 @@ int main() {
         clearScreen();
 
         // Define the paths to the lyrics
-        const char *directory = "lyrics/s3rl"; // Set directory path
+        const char *directory = "lyrics/imaginedragons"; // Set directory path
         LyricsStruct lyricsList = generateLyricsList(directory);
     
         if (lyricsList.array == NULL || lyricsList.count == 0) {
@@ -506,7 +512,7 @@ int main() {
             while (guesserMultipleChoice(lyricsList, randomFileIndex, randomValue) == 0) {
 
                 // Print out lines based on hints
-                int hintValue = hints();
+                int hintValue = hints(correctAnswer);
 
                 if (hintValue == 1) {
 
@@ -538,7 +544,7 @@ int main() {
             while (guesser(correctAnswer) == 0) {
 
                 // Print out lines based on hints
-                int hintValue = hints();
+                int hintValue = hints(correctAnswer);
 
                 if (hintValue == 1) {
                     hintsUsed++;
