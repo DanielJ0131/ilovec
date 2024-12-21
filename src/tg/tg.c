@@ -403,9 +403,9 @@ int main() {
 
     while (menu(event, quit, buttons) == 0 ) {
 
-        // Draw over text by rendering backgroundTexture again
+        // Clear text by rendering backgroundTexture again
+	SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-        SDL_RenderPresent(renderer);
 
         int randomTrackIndex = rand() % trackList.count;
 
@@ -432,7 +432,7 @@ int main() {
         int correctChoice = rand() % 4;
         generateUniqueIndices(trackList.count, randomTrackIndex, uniqueIndices, correctChoice);
 
-        printf("correctChoice = %d\n", correctChoice);
+        printf("correctIndexChoice = %d\n", correctChoice);
         for (int i = 0; i < 4; i++) {
             printf("uniqueIndices[%d] = %d\n", i, uniqueIndices[i]);
         }
