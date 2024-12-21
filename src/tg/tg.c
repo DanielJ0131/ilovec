@@ -432,6 +432,7 @@ int main() {
         int correctChoice = rand() % 4;
         generateUniqueIndices(trackList.count, randomTrackIndex, uniqueIndices, correctChoice);
 
+	// Debug
         printf("correctIndexChoice = %d\n", correctChoice);
         for (int i = 0; i < 4; i++) {
             printf("uniqueIndices[%d] = %d\n", i, uniqueIndices[i]);
